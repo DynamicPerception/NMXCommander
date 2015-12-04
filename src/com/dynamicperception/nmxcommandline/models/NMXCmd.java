@@ -1,5 +1,6 @@
 package com.dynamicperception.nmxcommandline.models;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.dynamicperception.nmxcommandline.helpers.Consts;
@@ -42,8 +43,35 @@ public class NMXCmd {
 		debug = enabled;
 	}
 
+	public static class CmdType{
+		public static final String GENERAL = "g";
+		public static final String MOTOR = "m";
+		public static final String CAMERA = "c";
+		public static final String KEYFRAME = "k";
+	}
+	
+	public static void execute(String type, String cmd, List<Integer> args){
+				
+		if(type.equals(CmdType.GENERAL)){
+			General.command(cmd, args);
+		}
+		else if(type.equals(CmdType.MOTOR)){
+			Motor.command(cmd, args);
+		}
+		else if(type.equals(CmdType.CAMERA)){
+			Camera.command(cmd, args);
+		}
+		else if(type.equals(CmdType.KEYFRAME)){
+			KeyFrame.command(cmd, args);
+		}
+	}
+	
 	// General commands
 	public static class General {
+		
+		public static void command(String cmd, List<Integer> args){
+
+		}
 
 		public static void startProgram() {
 			
@@ -391,25 +419,208 @@ public class NMXCmd {
 	// Motor commands
 	public static class Motor {
 		
-		public static void motorCommand(String cmd, float[] args){
-			if(cmd.equals(SETSLEEP)){
-				boolean sleep = args[1] == 0 ? false : true;
-				setSleep((int) args[0], sleep);
+		public static class Names{
+			static final String SET_SLEEP 		= "setsleep";
+			static final String SET_ENABLE 		= "setenable";			
+			static final String SET_BACKLASH 	= "setbacklash";
+			static final String SET_MICROSTEPS 	= "setms";			
+			
+			static final String RESET_LIMITS 	= "resetlimits";
+			static final String SET_HOME 		= "sethome";		
+			static final String SET_END_HERE 	= "setendhere";
+			static final String SET_START_HERE	= "setstarthere";
+			static final String SET_STOP_HERE 	= "setstophere";
+			
+			static final String SEND_HOME 		= "sendhome";
+			static final String SEND_END 		= "sendend";
+			static final String SEND_START 		= "sendstart";
+			static final String SEND_STOP		= "sendstop";
+			static final String SEND_TO 		= "sendto";
+			
+			static final String STOP_MOTOR 		= "stop";
+			static final String SET_MAXSPEED 	= "setmaxspeed";
+			static final String SET_DIR 		= "setdir";
+			static final String SET_SPEED		= "setspeed";
+			static final String SET_ACCEL		= "setaccel";						
+			
+			static final String IS_RUNNING 		= "isrunning";
+			static final String GET_ENABLE 		= "getenable";			
+			static final String GET_BACKLASH 	= "getbacklash";
+			static final String GET_MS 			= "getms";
+			static final String GET_END 		= "getend";
+			static final String GET_POS 		= "getpos";			
+			static final String GET_SPEED 		= "getspeed";
+			static final String GET_ACCEL 		= "getaccel";
+			static final String GET_START 		= "getstart";
+			static final String GET_STOP 		= "getstop";
+			static final String GET_TRAVEL_TIME = "gettraveltime";
+			static final String GET_SLEEP 		= "getsleep";
+			
+			public static void help(){
+				System.out.println("\n***** Motor Command Directory *****\n");
+				System.out.println("General settings: \n" + SET_SLEEP + "\n" + SET_ENABLE + "\n" + SET_BACKLASH + "\n" + SET_MICROSTEPS + "\n");
+				System.out.println("Limits settings: \n" + RESET_LIMITS + "\n" + SET_HOME + "\n" + SET_END_HERE + "\n" + SET_START_HERE + "\n" + SET_STOP_HERE + "\n");
+				System.out.println("Go to commands: \n" + SEND_HOME + "\n" + SEND_END + "\n" + SEND_START + "\n" + SEND_STOP + "\n" + SEND_TO +	"\n");
+				System.out.println("Movement commands: \n" + STOP_MOTOR + "\n" + SET_MAXSPEED + "\n" + SET_DIR + "\n" + SET_SPEED + "\n" + SET_ACCEL + "\n");
+				System.out.println("Status queries: \n" + IS_RUNNING + "\n" + GET_ENABLE + "\n" + GET_BACKLASH + "\n" + GET_MS + "\n" + GET_END + "\n" + GET_POS + 
+						"\n" + GET_SPEED + "\n" + GET_ACCEL + "\n" + GET_START + "\n" + GET_STOP + "\n" + GET_TRAVEL_TIME + "\n" + GET_SLEEP);	
+			}			
+		}
+
+		
+		public static void command(String cmd, List<Integer> args){
+			final int ALL_MOTORS = 3;
+						
+			float floatMot = -1;
+			if(args.size() > 0){
+				floatMot = args.get(0);
+				// Trim the motor value from the arguments list
+				args.remove(0);
 			}
+			int mot = (int) floatMot;	
+			
+			// Don't allow illegal motor vals					
+			mot = mot > 2 ? mot = 3 : mot < -1 ? mot = -1 : mot;
+
+			// If all motors were requested, repeat the command for each one
+			int commandCount = 1;
+			if(mot == ALL_MOTORS){
+				commandCount = Consts.MOTOR_COUNT;
+				for(int i = 0; i < commandCount; i++){
+					command(cmd, i, args);
+				}
+			}
+			else{
+				command(cmd, mot, args);
+			}
+		}
+		
+		private static void command(String cmd, int motor, List<Integer> args){			
+			
+			int data = 0;
+			if(args.size() > 0)
+				data = args.get(0);
+			
+			if(cmd.equals(Names.SET_SLEEP)){
+				boolean sleep = true;				
+				sleep = data == 0 ? false : true;				
+				Motor.setSleep(motor, sleep);
+			}
+			else if(cmd.equals(Names.GET_SLEEP)){
+				Motor.getSleepState(motor);
+			}
+			else if(cmd.equals(Names.SET_ENABLE)){
+				boolean enable = true;
+				enable = data == 0 ? false : true;
+				Motor.setEnable(motor, enable);
+			}
+			else if(cmd.equals(Names.GET_ENABLE)){
+				Motor.getEnableStatus(motor);
+			}
+			else if(cmd.equals(Names.STOP_MOTOR)){
+				Motor.stopMotor(motor);
+			}
+			else if(cmd.equals(Names.SET_BACKLASH)){				
+				Motor.setBacklash(motor, data);
+			}
+			else if(cmd.equals(Names.SET_MICROSTEPS)){
+				Motor.setMicrosteps(motor, data);
+			}
+			else if(cmd.equals(Names.SET_MAXSPEED)){
+				Motor.setMaxSpeed(motor, data);
+			}
+			else if(cmd.equals(Names.SET_DIR)){
+				Motor.setDir(motor, data);
+			}
+			else if(cmd.equals(Names.SET_HOME)){
+				Motor.setHomeHere(motor);
+			}
+			else if(cmd.equals(Names.SET_END_HERE)){
+				Motor.setEndHere(motor);
+			}
+			else if(cmd.equals(Names.SEND_HOME)){
+				Motor.sendToHome(motor);
+			}
+			else if(cmd.equals(Names.SEND_END)){
+				Motor.sendToEnd(motor);
+			}
+			else if(cmd.equals(Names.SET_SPEED)){
+				try {
+					Motor.setSpeed(motor, data);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			else if(cmd.equals(Names.SET_ACCEL)){
+				Motor.setContAccelDecel(motor, data);
+			}
+			else if(cmd.equals(Names.SEND_START)){
+				Motor.sendToStart(motor);
+			}
+			else if(cmd.equals(Names.SEND_STOP)){
+				Motor.sendToStop(motor);
+			}
+			else if(cmd.equals(Names.RESET_LIMITS)){
+				Motor.resetLimits(motor);
+			}
+			else if(cmd.equals(Names.SET_START_HERE)){
+				Motor.setStartHere(motor);
+			}
+			else if(cmd.equals(Names.SET_STOP_HERE)){
+				Motor.setStopHere(motor);
+			}
+			else if(cmd.equals(Names.SEND_TO)){
+				Motor.sendToRaw(motor, data);
+			}
+			else if(cmd.equals(Names.GET_BACKLASH)){
+				Motor.getBacklashSteps(motor);
+			}
+			else if(cmd.equals(Names.GET_MS)){
+				Motor.getMicrosteps(motor);
+			}
+			else if(cmd.equals(Names.GET_END)){
+				Motor.getEndPosition(motor);
+			}
+			else if(cmd.equals(Names.GET_POS)){
+				Motor.getCurrentPosition(motor);
+			}
+			else if(cmd.equals(Names.IS_RUNNING)){
+				try {
+					Motor.isRunning(motor);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}			
+			else if(cmd.equals(Names.GET_SPEED)){
+				Motor.getContinuousSpeed(motor);
+			}
+			else if(cmd.equals(Names.GET_ACCEL)){
+				Motor.getAccelDecel(motor);
+			}
+			else if(cmd.equals(Names.GET_START)){
+				Motor.getStart(motor);
+			}
+			else if(cmd.equals(Names.GET_STOP)){
+				Motor.getStop(motor);
+			}
+			else if(cmd.equals(Names.GET_TRAVEL_TIME)){
+				Motor.getTravelTime(motor);
+			}			
 		}
 
 		public static void sendAllMotorsHome() {
 			
 			NMXCmd.General.sendAllMotorsHome();
 		}
-		
-		private static String SETSLEEP = "setSleep";
-		
-		public static void setSleep(){
-			System.out.println("setSleep(int motor, boolean sleep_state)");
-		}
-
+						
 		public static void setSleep(int motor, boolean sleep_state) {
+			
+			if(motor == -1){
+				System.out.println("setSleep(int motor, boolean sleep_state)");
+				return;
+			}
 			
 			// If a command is currently being sent, wait
 			waitForNMX();
@@ -425,8 +636,13 @@ public class NMXCmd {
 				System.out.println("Setting motor " + motor + " sleep state: " + sleep_state);
 			NMXComs.cmd(addr, subaddr, command, size, data);
 		}
-
+				
 		public static void setEnable(int motor, boolean enable_state) {
+			
+			if(motor == -1){
+				System.out.println("setEnable(int motor, boolean enable_state)");
+				return;
+			}
 			
 			// If a command is currently being sent, wait
 			waitForNMX();
@@ -442,8 +658,13 @@ public class NMXCmd {
 				System.out.println("Setting motor " + motor + " enable state: " + enable_state);
 			NMXComs.cmd(addr, subaddr, command, size, data);
 		}
-
+		
 		public static void stopMotor(int motor) {
+			
+			if(motor == -1){				
+				System.out.println("stopMotor(int motor)");				
+				return;
+			}
 			
 			// If a command is currently being sent, wait
 			waitForNMX();
@@ -457,8 +678,13 @@ public class NMXCmd {
 				System.out.println("Stopping motor " + motor);
 			NMXComs.cmd(addr, subaddr, command);
 		}
-
+				
 		public static void setBacklash(int motor, int backlash) {
+			
+			if(motor == -1){				
+				System.out.println("setBacklash(int motor, int backlash)");				
+				return;
+			}
 			
 			// If a command is currently being sent, wait
 			waitForNMX();
@@ -472,10 +698,15 @@ public class NMXCmd {
 			int data = backlash;
 			if(debug)
 				System.out.println("Setting motor " + motor + " backlash: " + backlash + " steps");
-			NMXComs.cmd(addr, subaddr, command, size, data);
+			NMXComs.cmd(addr, subaddr, command, size, data);			
 		}
-
+				
 		public static void setMicrosteps(int motor, int ms) {
+			
+			if(motor == -1){				
+				System.out.println("setMicrosteps(int motor, int ms)");				
+				return;
+			}
 			
 			// If a command is currently being sent, wait
 			waitForNMX();
@@ -496,8 +727,13 @@ public class NMXCmd {
 			NMXComs.cmd(addr, subaddr, command, size, data);
 			waitForNMX();
 		}
-
+				
 		public static void setMaxSpeed(int motor, float max_speed) {
+			
+			if(motor == -1){				
+				System.out.println("setMaxSpeed(int motor, float max_speed)");				
+				return;
+			}
 			
 			// If a command is currently being sent, wait
 			waitForNMX();
@@ -513,8 +749,13 @@ public class NMXCmd {
 				System.out.println("Setting motor " + motor + " max speed: " + max_speed + " steps/s");
 			NMXComs.cmd(addr, subaddr, command, size, data);
 		}
-
+				
 		public static void setDir(int motor, int dir) {
+			
+			if(motor == -1){				
+				System.out.println("setDir(int motor, int dir)");				
+				return;
+			}
 			
 			// If a command is currently being sent, wait
 			waitForNMX();
@@ -532,6 +773,12 @@ public class NMXCmd {
 		}
 		
 		public static void setHomeHere(int motor){
+			
+			if(motor == -1){				
+				System.out.println("setHomeHere(int motor)");				
+				return;
+			}
+			
 			// This command causes the NMX to write to EEPROM, which takes longer,
 			// so give a longer response time
 			setHomeHere(motor, NMXComs.ResponseTiming.EEPROM);
@@ -558,6 +805,11 @@ public class NMXCmd {
 
 		public static void setEndHere(int motor) {
 			
+			if(motor == -1){				
+				System.out.println("setEndHere(int motor)");				
+				return;
+			}
+			
 			// If a command is currently being sent, wait
 			waitForNMX();
 			
@@ -575,8 +827,13 @@ public class NMXCmd {
 			NMXComs.cmd(addr, subaddr, command);
 			waitForNMX();
 		}
-
+		
 		public static void sendToHome(int motor) {
+			
+			if(motor == -1){				
+				System.out.println("sendToHome(int motor)");				
+				return;
+			}
 			
 			// If a command is currently being sent, wait
 			waitForNMX();
@@ -590,8 +847,13 @@ public class NMXCmd {
 				System.out.println("Sending motor " + motor + " home limit");
 			NMXComs.cmd(addr, subaddr, command);
 		}
-
+		
 		public static void sendToEnd(int motor) {
+			
+			if(motor == -1){				
+				System.out.println("sendToEnd(int motor)");				
+				return;
+			}
 			
 			// If a command is currently being sent, wait
 			waitForNMX();
@@ -605,7 +867,7 @@ public class NMXCmd {
 				System.out.println("Setting motor " + motor + " to end limit");
 			NMXComs.cmd(addr, subaddr, command);
 		}
-
+		
 		/**
 		 * Sets motor's continuous speed. If running in joystick mode, use
 		 * positive and negative numbers to set direction
@@ -614,9 +876,13 @@ public class NMXCmd {
 		 *            Motor number <b>0</b>, <b>1</b>, or <b>2</b>
 		 * @param speed
 		 *            Speed in steps/s.
-		 */
-				
+		 */				
 		public static void setSpeed(int motor, float speed) throws InterruptedException {
+			
+			if(motor == -1){				
+				System.out.println("setSpeed(int motor, float speed)");				
+				return;
+			}
 			
 			// If a command is currently being sent, wait
 			waitForNMX();
@@ -633,7 +899,7 @@ public class NMXCmd {
 			NMXComs.cmd(addr, subaddr, command, size, data, false, true);
 			waitForNMX();
 		}
-
+		
 		/**
 		 * Accel/decel used for smoothing speed changes for continuous motion
 		 * (e.g. joystick mode)
@@ -644,6 +910,11 @@ public class NMXCmd {
 		 *            Rate in steps/sec^2
 		 */
 		public static void setContAccelDecel(int motor, float accel_decel) {
+			
+			if(motor == -1){				
+				System.out.println("setContAccelDecel(int motor, float accel_decel)");				
+				return;
+			}
 			
 			// If a command is currently being sent, wait
 			waitForNMX();
@@ -659,7 +930,8 @@ public class NMXCmd {
 			NMXComs.cmd(addr, subaddr, command, size, data);
 		}
 		
-		public static void simpleMove(int motor, boolean forward, int steps){
+		public static void simpleMove(int motor, boolean forward, int steps){			
+			
 			// If a command is currently being sent, wait
 			waitForNMX();
 			
@@ -680,8 +952,14 @@ public class NMXCmd {
 				System.out.println("Starting motor " + motor + " simple move -- Forward?: " + forward + " Steps: " + steps);
 			NMXComs.cmd(addr, subaddr, command, size, data);
 		}
-		
+				
 		public static void sendToStart(int motor){
+			
+			if(motor == -1){				
+				System.out.println("sendToStart(int motor)");				
+				return;
+			}
+			
 			// If a command is currently being sent, wait
 			waitForNMX();
 			
@@ -691,8 +969,14 @@ public class NMXCmd {
 				System.out.println("Sending motor " + motor + " to start");
 			NMXComs.cmd(addr, subaddr, command);			
 		}
-		
+				
 		public static void sendToStop(int motor){
+			
+			if(motor == -1){				
+				System.out.println("sendToStop(int motor)");				
+				return;
+			}
+			
 			// If a command is currently being sent, wait
 			waitForNMX();
 			
@@ -702,8 +986,14 @@ public class NMXCmd {
 				System.out.println("Sending motor " + motor + " to stop");
 			NMXComs.cmd(addr, subaddr, command);			
 		}
-		
+				
 		public static void resetLimits(int motor){
+			
+			if(motor == -1){				
+				System.out.println("resetLimits(int motor)");				
+				return;
+			}
+			
 			// If a command is currently being sent, wait
 			waitForNMX();
 			NMXComs.setResponseDelay(NMXComs.ResponseTiming.EEPROM);
@@ -724,8 +1014,14 @@ public class NMXCmd {
 				System.out.println("Autosetting motor " + motor + " microsteps");
 			NMXComs.cmd(addr, subaddr, command);			
 		}
-		
+				
 		public static void setStartHere(int motor){
+			
+			if(motor == -1){				
+				System.out.println("setStartHere(int motor)");				
+				return;
+			}
+			
 			// If a command is currently being sent, wait
 			waitForNMX();
 			
@@ -735,8 +1031,14 @@ public class NMXCmd {
 				System.out.println("Setting motor " + motor + " start here");
 			NMXComs.cmd(addr, subaddr, command);			
 		}
-		
+				
 		public static void setStopHere(int motor){
+			
+			if(motor == -1){				
+				System.out.println("setStopHere(int motor)");				
+				return;
+			}
+			
 			// If a command is currently being sent, wait
 			waitForNMX();
 			
@@ -746,8 +1048,13 @@ public class NMXCmd {
 				System.out.println("Setting motor " + motor + " stop here");
 			NMXComs.cmd(addr, subaddr, command);			
 		}
-		
+				
 		public static void sendToRaw(int motor, int pos){
+			
+			if(motor == -1){				
+				System.out.println("sendToRaw(int motor, int pos) -- Note: This does not correct for microstep setting. Make sure you know what your MS setting is!");				
+				return;
+			}
 			
 			// If the position is 0, use the sendToHome command instead
 			if(pos == 0){
@@ -771,8 +1078,13 @@ public class NMXCmd {
 			if (_motor < 0 || _motor >= Consts.MOTOR_COUNT)
 				throw new IllegalArgumentException("Not a valid motor");
 		}
-		
+				
 		public static boolean getEnableStatus(int motor) {
+			
+			if(motor == -1){				
+				System.out.println("getEnableStatus(int motor)");				
+				return false;
+			}
 			
 			// If a command is currently being sent, wait
 			waitForNMX();			
@@ -790,8 +1102,13 @@ public class NMXCmd {
 			else
 				return true;					
 		}
-		
+				
 		public static int getBacklashSteps(int motor) {
+			
+			if(motor == -1){				
+				System.out.println("getBacklashSteps(int motor)");				
+				return 0;
+			}			
 			
 			// If a command is currently being sent, wait
 			waitForNMX();			
@@ -806,8 +1123,13 @@ public class NMXCmd {
 			waitForNMX();
 			return NMXComs.getResponseVal();
 		}
-		
+				
 		public static int getMicrosteps(int motor){
+			if(motor == -1){				
+				System.out.println("getMicrosteps(int motor) -- Returns: Motor's current microstep setting");				
+				return 0;
+			}
+			
 			return getMicrosteps(motor, 0);
 		}
 		
@@ -848,6 +1170,11 @@ public class NMXCmd {
 		 */
 		public static int getMaxStepRate(int motor) {
 			
+			if(motor == -1){				
+				System.out.println("getMaxStepRate(int motor) -- Returns: Motor's max step rate in current microsteps/sec^2");				
+				return 0;
+			}
+			
 			// If a command is currently being sent, wait
 			waitForNMX();
 			
@@ -862,9 +1189,14 @@ public class NMXCmd {
 			waitForNMX();
 			return NMXComs.getResponseVal();
 		}
-		
+				
 		public static int getEndPosition(int motor) {
 			
+			if(motor == -1){				
+				System.out.println("getEndPosition(int motor) -- Returns: Motor's end limit in current microsteps");				
+				return 0;
+			}
+			
 			// If a command is currently being sent, wait
 			waitForNMX();
 			
@@ -879,12 +1211,18 @@ public class NMXCmd {
 			waitForNMX();
 			return NMXComs.getResponseVal();
 		}
-		
+				
 		public static int getCurrentPosition(int motor){
+			
+			if(motor == -1){				
+				System.out.println("getCurrentPosition(int motor) -- Returns: Motor's position in current microsteps");				
+				return 0;
+			}
+			
 			return getCurrentPosition(motor, 0);
 		}
 
-		private static int getCurrentPosition(int motor, int iteration) {
+		private static int getCurrentPosition(int motor, int iteration) {		
 			
 			// If a command is currently being sent, wait
 			waitForNMX();			
@@ -896,6 +1234,8 @@ public class NMXCmd {
 			NMXComs.cmd(addr, subaddr, command);
 			waitForNMX();
 			int ret = NMXComs.getResponseVal();
+			if(debug)
+				System.out.println("Querying motor " + motor + " current postion: " + ret);
 			if(ret != Consts.ERROR){
 				return ret;
 			}
@@ -919,8 +1259,7 @@ public class NMXCmd {
 
 			int subaddr = motor + 1;
 			int command = 106;
-			if(debug)
-				System.out.println("Querying motor " + motor + " postion");
+
 			NMXComs.cmd(addr, subaddr, command, true);
 			waitForNMX();
 			int ret = NMXComs.getResponseVal();			
@@ -928,8 +1267,13 @@ public class NMXCmd {
 				System.out.println("Querying motor " + motor + " current postion: " + ret);
 			return ret;
 		}
-		
+	
 		public static boolean isRunning(int motor) throws InterruptedException {
+			
+			if(motor == -1){				
+				System.out.println("isRunning(int motor) -- Returns: Whether the motor is currently moving");				
+				return false;
+			}
 			
 			// If a command is currently being sent, wait
 			waitForNMX();
@@ -937,34 +1281,48 @@ public class NMXCmd {
 			validateMotor(motor);
 
 			int subaddr = motor + 1;
-			int command = 107;
-			if(debug)
-				System.out.println("Querying motor " + motor + " running status");
+			int command = 107;			
 			NMXComs.cmd(addr, subaddr, command, true);
-			waitForNMX();			
+			waitForNMX();
+			boolean ret;
 			if(NMXComs.getResponseVal() > 0)
-				return true;
+				ret = true;
 			else
-				return false;
+				ret = false;
+			
+			if(debug)
+				System.out.println("Querying motor " + motor + " running status: " + ret);
+			return ret;
 		}
 		
 		public static float getContinuousSpeed(int motor) {
 			
+			if(motor == -1){				
+				System.out.println("getContinuousSpeed(int motor) -- Returns: The motor speed in current microsteps/sec");				
+				return 0;
+			}
+			
 			// If a command is currently being sent, wait
 			waitForNMX();
 			
 			validateMotor(motor);
 
 			int subaddr = motor + 1;
-			int command = 108;
-			if(debug)
-				System.out.println("Querying motor " + motor + " continuous speed (steps/sec)");
+			int command = 108;			
 			NMXComs.cmd(addr, subaddr, command);
 			waitForNMX();
-			return (NMXComs.getResponseVal() / FLOAT_CONVERSION);
+			float ret = NMXComs.getResponseVal() / FLOAT_CONVERSION;
+			if(debug)
+				System.out.println("Querying motor " + motor + " continuous speed: " + ret + " steps/sec");
+			return ret;
 		}
-		
+				
 		public static float getAccelDecel(int motor) {
+			
+			if(motor == -1){				
+				System.out.println("getAccelDecel(int motor) -- Returns: The motor accel in current microsteps/sec^2");				
+				return 0;
+			}
 			
 			// If a command is currently being sent, wait
 			waitForNMX();			
@@ -973,20 +1331,26 @@ public class NMXCmd {
 
 			int subaddr = motor + 1;
 			int command = 109;
-			if(debug)
-				System.out.println("Querying motor " + motor + " accel/decel rate (steps/sec^2)");
+			
 			NMXComs.cmd(addr, subaddr, command);
 			waitForNMX();
 			
 			float ret = (NMXComs.getResponseVal() / FLOAT_CONVERSION);
+			if(debug)
+				System.out.println("Querying motor " + motor + " accel/decel rate: " + ret + " steps/sec^2");
 			return ret;
 		}
-		
+				
 		/**
 		 * @param motor Which motor to query
-		 * @return The program start position in 16th microsteps
+		 * @return The program start position in current microsteps
 		 */
 		public static int getStart(int motor) {
+			
+			if(motor == -1){				
+				System.out.println("getStart(int motor) -- Returns: The motor start position in current microsteps");				
+				return 0;
+			}	
 			
 			// If a command is currently being sent, wait
 			waitForNMX();			
@@ -1003,13 +1367,18 @@ public class NMXCmd {
 				System.out.println("Querying motor " + motor + " start position (Graffik steps): " + ret);
 			return ret;
 		}
-
+				
 		/**
 		 * @param motor Which motor to query
-		 * @return The program stop position in 16th microsteps
+		 * @return The program stop position in current microsteps
 		 */
 
 		public static int getStop(int motor) {
+			
+			if(motor == -1){				
+				System.out.println("getStop(int motor) -- Returns: The motor stop position in current microsteps");				
+				return 0;
+			}	
 			
 			// If a command is currently being sent, wait
 			waitForNMX();			
@@ -1034,6 +1403,11 @@ public class NMXCmd {
 		 */
 		public static int getTravelTime(int motor) {
 			
+			if(motor == -1){				
+				System.out.println("getTravelTime(int motor)");				
+				return 0;
+			}		
+			
 			// If a command is currently being sent, wait
 			waitForNMX();			
 
@@ -1048,8 +1422,13 @@ public class NMXCmd {
 				System.out.println("Querying motor " + motor + " travel time (frames or milliseconds): " + res);
 			return res;
 		}
-		
+					
 		public static boolean getSleepState(int motor) {
+			
+			if(motor == -1){				
+				System.out.println("getSleepState(int motor)");				
+				return false;
+			}		
 			
 			// If a command is currently being sent, wait
 			waitForNMX();			
@@ -1074,6 +1453,10 @@ public class NMXCmd {
 
 	// Camera commands
 	public static class Camera {
+		
+		public static void command(String cmd, List<Integer> args){
+
+		}
 		
 		public static void setEnabled(boolean enabled) {
 			
@@ -1400,16 +1783,15 @@ public class NMXCmd {
 			if(debug)
 				System.out.println("Keep alive? : " + res);
 			return res;
-		}
-		
-		
-		
-		
-
+		}		
 	}
 
 	// Key frame commands
 	public static class KeyFrame {
+		
+		public static void command(String cmd, List<Integer> args){
+
+		}
 		
 		private static void verifyCommand(int data){
 			
