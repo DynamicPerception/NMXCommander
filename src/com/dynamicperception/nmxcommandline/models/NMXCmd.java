@@ -2194,7 +2194,135 @@ public class NMXCmd {
 	// Key frame commands
 	public static class KeyFrame {
 		
+		public static class Names{
+			// General settings
+			static final String SET_AXIS		= "setaxos";
+			static final String SET_KF_COUNT	= "setkfcount";
+			static final String SET_ABSC	 	= "setabsc";			
+			static final String SET_POS			= "setpos";
+			static final String SET_VEL			= "setvel";			
+			
+			// General queries
+			static final String GET_FIRMWARE	= "getfirmware";
+			static final String GET_MEMORY	 	= "getmemory";
+			static final String GET_VOLTAGE 	= "getvoltage";
+			static final String GET_CURRENT 	= "getcurrent";
+			static final String GET_MOT_ATTCH	=  "getmotorattach";			
+			static final String GET_JOYSTICK	 =  "getjoystickmode";			
+			static final String GET_WATCHDOG	=  "getwatchdog";
+			
+			// Program settings
+			static final String SET_MODE		= "setmode";
+			static final String SET_PINGPONG 	= "setpingpong";
+			static final String SET_FPS			= "setfps";			
+			
+			// Program control
+			static final String START			= "start";
+			static final String PAUSE			= "pause";			
+			static final String STOP 			= "stop	";
+			
+			// Program queries
+			static final String GET_PROGRAM_MODE 	=  "getprogrammode";			
+			static final String GET_FPS 			= "getfps";			
+			static final String GET_PROGRAM_DELAY 	=  "getprogramdelay";
+			static final String GET_PROGRAM_TIME 	=  "getprogramtime";
+			static final String GET_PINGPONG		=  "getpingpong";
+			static final String GET_RUN_STATUS 		= "getrunstatus";
+			static final String GET_PCT_COMP		=  "getpercentcomplete";		
+			
+
+			
+			public static void help(){
+				System.out.println("\n***** General Command Directory *****\n");
+				System.out.println("General settings: \n" + SET_ADDRESS + "\n" + SET_DEBUG + "\n" + TOGGLE_LED + "\n" + SET_JOYSTICK + "\n" + SET_GRAFFIK + "\n");
+				System.out.println("General queries: \n" + GET_FIRMWARE + "\n" + GET_MEMORY + "\n" + GET_VOLTAGE + "\n" + GET_CURRENT + "\n" + GET_MOT_ATTCH + "\n" + GET_JOYSTICK + "\n" + GET_WATCHDOG + "\n");
+				System.out.println("Program settings: \n" + SET_MODE + "\n" + SET_PINGPONG + "\n" + SET_FPS + "\n");
+				System.out.println("Program control: \n" + START + "\n" + PAUSE + "\n" + STOP + "\n");
+				System.out.println("Program queries: \n" + GET_PROGRAM_MODE + "\n" + GET_FPS + "\n" + GET_PROGRAM_DELAY + "\n" + GET_PROGRAM_TIME +
+						"\n" + GET_PINGPONG + "\n" + GET_RUN_STATUS + "\n" + GET_PCT_COMP);	
+			}			
+		}
+		
 		public static void command(String cmd, int data){
+			if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			else if(cmd.equals(Names.anObject)){
+				
+			}
+			
 
 		}
 		
