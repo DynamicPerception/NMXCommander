@@ -51,22 +51,21 @@ public class NMXCmd {
 	}
 	
 	public static void execute(String type, String cmd, List<Integer> args){
-				
-		if(type.equals(CmdType.GENERAL)){
-			int data = 0;
-			if(args.size() > 0){
-				data = args.get(0);
-			}
+		int data = 0;
+		if(args.size() > 0){
+			data = args.get(0);
+		}
+		if(type.equals(CmdType.GENERAL)){			
 			General.command(cmd, data);
 		}
 		else if(type.equals(CmdType.MOTOR)){
 			Motor.command(cmd, args);
 		}
 		else if(type.equals(CmdType.CAMERA)){
-			Camera.command(cmd, args);
+			Camera.command(cmd, data);
 		}
 		else if(type.equals(CmdType.KEYFRAME)){
-			KeyFrame.command(cmd, args);
+			KeyFrame.command(cmd, data);
 		}
 	}
 	
@@ -741,7 +740,7 @@ public class NMXCmd {
 			static final String SET_ACCEL		= "setaccel";						
 			
 			static final String IS_RUNNING 		= "isrunning";
-			static final String GET_ENABLE 		= "getenable";			
+			static final String GET_ENABLE 		= "isenabled";			
 			static final String GET_BACKLASH 	= "getbacklash";
 			static final String GET_MS 			= "getms";
 			static final String GET_END 		= "getend";
@@ -2086,7 +2085,7 @@ public class NMXCmd {
 	// Key frame commands
 	public static class KeyFrame {
 		
-		public static void command(String cmd, List<Integer> args){
+		public static void command(String cmd, int data){
 
 		}
 		
