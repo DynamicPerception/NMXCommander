@@ -1750,7 +1750,116 @@ public class NMXCmd {
 	// Camera commands
 	public static class Camera {
 		
-		public static void command(String cmd, List<Integer> args){
+		public static class Names{
+			// General settings			
+			static final String SET_ENABLE 		= "setenable";			
+			static final String SET_TEST_MODE 	= "settestmode";			
+			static final String SET_KEEPALIVE	= "setkeepalive";			
+			static final String EXPOSE_NOW 		= "expose";
+			
+			// General queries
+			static final String GET_ENABLED		= "isenabled";
+			static final String GET_TEST_MODE	= "gettestmode";
+			static final String GET_KEEPALIVE	= "getkeepalive";
+			static final String GET_EXPOSING	= "isexposing";
+			
+			// Exposure settings
+			static final String SET_INTERVAL	= "setinterval";
+			static final String SET_TRIGGER 	= "settrigger";
+			static final String SET_FOCUS 		= "setfocus";				
+			static final String SET_DELAY	 	= "setdelay";
+			static final String SET_MAX_SHOTS	= "setmaxshots";		
+			static final String SET_MUP		 	= "setmup";			
+			
+			// Exposure queries			
+			static final String GET_SHOTS		= "getshots";	
+			static final String GET_INTERVAL	= "getinterval";
+			static final String GET_TRIGGER		= "gettrigger";
+			static final String GET_FOCUS 		= "getfocus";
+			static final String GET_DELAY	 	= "getdelay";
+			static final String GET_MAX_SHOTS 	= "getmaxshots";			
+			static final String GET_MUP 		= "getmup";
+													
+			public static void help(){
+				System.out.println("\n***** Camera Command Directory *****\n");
+				System.out.println("General settings: \n" + SET_ENABLE + "\n" + SET_TEST_MODE + "\n" + SET_KEEPALIVE + "\n" + EXPOSE_NOW + "\n");
+				System.out.println("General queries: \n" + GET_ENABLED + "\n" + GET_TEST_MODE + "\n" + GET_KEEPALIVE + "\n" + GET_EXPOSING + "\n");
+				System.out.println("Exposure settings: \n" + SET_INTERVAL + "\n" + SET_TRIGGER + "\n" + SET_FOCUS + "\n" + SET_DELAY + "\n" + SET_MAX_SHOTS + "\n" + SET_MUP + "\n");
+				System.out.println("Exposure queries: \n" + GET_INTERVAL + "\n" + GET_TRIGGER + "\n" + GET_FOCUS + "\n" + GET_DELAY + "\n" + GET_MAX_SHOTS + "\n" + GET_MUP + "\n");				
+					
+			}			
+		}
+
+		
+		public static void command(String cmd, int data){
+			if(cmd.equals(Names.SET_ENABLE)){
+				boolean outVal = data == 0 ? false : true;
+				Camera.setEnabled(outVal);
+			}
+			else if(cmd.equals(Names.SET_TEST_MODE)){
+				boolean outVal = data == 0 ? false : true;
+				Camera.setTestMode(outVal);
+			}
+			else if(cmd.equals(Names.SET_KEEPALIVE)){
+				boolean outVal = data == 0 ? false : true;
+				Camera.setKeepAlive(outVal);
+			}
+			else if(cmd.equals(Names.EXPOSE_NOW)){
+				Camera.exposeNow();
+			}
+			else if(cmd.equals(Names.GET_ENABLED)){
+				Camera.isEnabled();
+			}
+			else if(cmd.equals(Names.GET_TEST_MODE)){
+				Camera.getTestMode();
+			}
+			else if(cmd.equals(Names.GET_KEEPALIVE)){
+				Camera.getKeepAlive();
+			}
+			else if(cmd.equals(Names.GET_EXPOSING)){
+				Camera.isExposingNow();
+			}
+			else if(cmd.equals(Names.SET_INTERVAL)){
+				Camera.setIntervalTime(data);
+			}
+			else if(cmd.equals(Names.SET_TRIGGER)){
+				Camera.setTriggerTime(data);
+			}
+			else if(cmd.equals(Names.SET_FOCUS)){
+				Camera.setFocusTime(data);
+			}
+			else if(cmd.equals(Names.SET_DELAY)){
+				Camera.setDelay(data);
+			}
+			else if(cmd.equals(Names.SET_MAX_SHOTS)){
+				Camera.setMaxShots(data);
+			}
+			else if(cmd.equals(Names.SET_MUP)){
+				boolean outVal = data == 0 ? false : true;
+				Camera.setMirrorUp(outVal);
+			}
+			else if(cmd.equals(Names.GET_SHOTS)){
+				Camera.getCurrentShots();
+			}
+			else if(cmd.equals(Names.GET_INTERVAL)){
+				Camera.getIntervalTime();
+			}
+			else if(cmd.equals(Names.GET_TRIGGER)){
+				Camera.getTriggerTime();
+			}
+			else if(cmd.equals(Names.GET_FOCUS)){
+				Camera.getFocusTime();
+			}
+			else if(cmd.equals(Names.GET_DELAY)){
+				Camera.getDelay();
+			}
+			else if(cmd.equals(Names.GET_MAX_SHOTS)){
+				Camera.getMaxShots();
+			}
+			else if(cmd.equals(Names.GET_MUP)){
+				Camera.getMirrorUp();
+			}
+			
 
 		}
 		
