@@ -61,7 +61,10 @@ public class NMXCommandLine {
 			// If there is no command, but there is a valid type, print the help for that type
 			if(type.equals("m")){
 				NMXCmd.Motor.Names.help();
-			}			
+			}
+			else if(type.equals("g")){
+				NMXCmd.General.Names.help();
+			}
 			// Otherwise, this was a garbage command, so ignore it
 			return;
 		}

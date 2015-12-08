@@ -53,7 +53,11 @@ public class NMXCmd {
 	public static void execute(String type, String cmd, List<Integer> args){
 				
 		if(type.equals(CmdType.GENERAL)){
-			General.command(cmd, args);
+			int data = 0;
+			if(args.size() > 0){
+				data = args.get(0);
+			}
+			General.command(cmd, data);
 		}
 		else if(type.equals(CmdType.MOTOR)){
 			Motor.command(cmd, args);
@@ -69,7 +73,138 @@ public class NMXCmd {
 	// General commands
 	public static class General {
 		
-		public static void command(String cmd, List<Integer> args){
+		public static class Names{
+			// General settings
+			static final String SET_ADDRESS 	= "setaddress";
+			static final String SET_DEBUG		= "setdebug";
+			static final String TOGGLE_LED	 	= "led";			
+			static final String SET_JOYSTICK	= "setjoystick";
+			static final String SET_GRAFFIK		= "setgraffik";			
+			
+			// General queries
+			static final String GET_FIRMWARE	= "getfirmware";
+			static final String GET_MEMORY	 	= "getmemory";
+			static final String GET_VOLTAGE 	= "getvoltage";
+			static final String GET_CURRENT 	= "getcurrent";
+			static final String GET_MOT_ATTCH	=  "getmotorattach";			
+			static final String GET_JOYSTICK	 =  "getjoystickmode";			
+			static final String GET_WATCHDOG	=  "getwatchdog";
+			
+			// Program settings
+			static final String SET_MODE		= "setmode";
+			static final String SET_PINGPONG 	= "setpingpong";
+			static final String SET_FPS			= "setfps";			
+			
+			// Program control
+			static final String START			= "start";
+			static final String PAUSE			= "pause";			
+			static final String STOP 			= "stop	";
+			
+			// Program queries
+			static final String GET_PROGRAM_MODE 	=  "getprogrammode";			
+			static final String GET_FPS 			= "getfps";			
+			static final String GET_PROGRAM_DELAY 	=  "getprogramdelay";
+			static final String GET_PROGRAM_TIME 	=  "getprogramtime";
+			static final String GET_PINGPONG		=  "getpingpong";
+			static final String GET_RUN_STATUS 		= "getrunstatus";
+			static final String GET_PCT_COMP		=  "getpercentcomplete";		
+			
+
+			
+			public static void help(){
+				System.out.println("\n***** General Command Directory *****\n");
+				System.out.println("General settings: \n" + SET_ADDRESS + "\n" + SET_DEBUG + "\n" + TOGGLE_LED + "\n" + SET_JOYSTICK + "\n" + SET_GRAFFIK + "\n");
+				System.out.println("General queries: \n" + GET_FIRMWARE + "\n" + GET_MEMORY + "\n" + GET_VOLTAGE + "\n" + GET_CURRENT + "\n" + GET_MOT_ATTCH + "\n" + GET_JOYSTICK + "\n" + GET_WATCHDOG + "\n");
+				System.out.println("Program settings: \n" + SET_MODE + "\n" + SET_PINGPONG + "\n" + SET_FPS + "\n");
+				System.out.println("Program control: \n" + START + "\n" + PAUSE + "\n" + STOP + "\n");
+				System.out.println("Program queries: \n" + GET_PROGRAM_MODE + "\n" + GET_FPS + "\n" + GET_PROGRAM_DELAY + "\n" + GET_PROGRAM_TIME +
+						"\n" + GET_PINGPONG + "\n" + GET_RUN_STATUS + "\n" + GET_PCT_COMP);	
+			}			
+		}		
+		
+		public static void command(String cmd, int data){
+			
+			if(cmd.equals(Names.SET_ADDRESS)){
+				General.setAddress(data);
+			}
+			else if(cmd.equals(Names.SET_DEBUG)){
+				General.toggleDebugMode(data);
+			}
+			else if(cmd.equals(Names.TOGGLE_LED)){
+				General.toggleLED();
+			}
+			else if(cmd.equals(Names.SET_JOYSTICK)){
+				boolean outVal = data == 0 ? false : true;
+				General.setJoystickMode(outVal);
+			}
+			else if(cmd.equals(Names.SET_GRAFFIK)){
+				boolean outVal = data == 0 ? false : true;
+				General.setGraffikMode(outVal);
+				
+			}
+			else if(cmd.equals(Names.GET_FIRMWARE)){
+				General.getFirmwareVersion();
+			}
+			else if(cmd.equals(Names.GET_MEMORY)){
+				General.getFreeMemory();
+			}
+			else if(cmd.equals(Names.GET_VOLTAGE)){
+				General.getVoltage();
+			}
+			else if(cmd.equals(Names.GET_CURRENT)){
+				General.getCurrent();
+			}
+			else if(cmd.equals(Names.GET_MOT_ATTCH)){
+				General.getMotorAttachment();
+			}
+			else if(cmd.equals(Names.GET_JOYSTICK)){
+				General.getJoystickMode();
+			}
+			else if(cmd.equals(Names.GET_WATCHDOG)){
+				General.getWatchdogMode();
+			}
+			else if(cmd.equals(Names.SET_MODE)){				
+				General.setProgramMode(data);
+			}
+			else if(cmd.equals(Names.SET_PINGPONG)){
+				boolean outVal = data == 0 ? false : true;
+				General.setPingPongFlag(outVal);
+				
+			}
+			else if(cmd.equals(Names.SET_FPS)){
+				General.setFPS(data);
+			}
+			else if(cmd.equals(Names.START)){
+				General.startProgram();
+			}
+			else if(cmd.equals(Names.PAUSE)){
+				General.pauseProgram();
+			}
+			else if(cmd.equals(Names.STOP)){
+				General.stopProgram();
+			}
+			else if(cmd.equals(Names.GET_PROGRAM_MODE)){
+				General.getProgramMode();
+			}
+			else if(cmd.equals(Names.GET_FPS)){
+				General.getFPS();
+			}
+			else if(cmd.equals(Names.GET_PROGRAM_DELAY)){
+				General.getProgramDelay();
+			}
+			else if(cmd.equals(Names.GET_PROGRAM_TIME)){
+				General.getProgramRunTime();
+			}
+			else if(cmd.equals(Names.GET_PINGPONG)){
+				General.getPingpongMode();
+			}
+			else if(cmd.equals(Names.GET_RUN_STATUS)){
+				General.getRunStatus();
+			}
+			else if(cmd.equals(Names.GET_PCT_COMP)){
+				General.getPercentComplete();
+			}
+			
 
 		}
 
@@ -305,7 +440,7 @@ public class NMXCmd {
 				System.out.println("Setting FPS to " + fps + " -- Flag val: " + data);			
 			NMXComs.cmd(addr, subaddr, command, size, data);
 		}
-		
+				
 		public static void setGraffikMode(boolean enable_state) {
 			
 			// If a command is currently being sent, wait
@@ -318,6 +453,71 @@ public class NMXCmd {
 			if(debug)
 				System.out.println("Setting Graffik mode: " + enable_state);			
 			NMXComs.cmd(addr, subaddr, command, size, data);
+		}
+				
+		public static int getFirmwareVersion(){
+			waitForNMX();
+			
+			int subaddr = 0;
+			int command = 100;
+			
+			NMXComs.cmd(addr, subaddr, command);
+			int ret = NMXComs.getResponseVal();
+			if(debug)
+				System.out.println("Querying firmware version -- Addr: " + addr + " Version: " + ret);
+			return ret;
+		}
+		
+		public static int getRunStatus(){
+			waitForNMX();
+			
+			int subaddr = 0;
+			int command = 101;
+			
+			NMXComs.cmd(addr, subaddr, command);
+			int ret = NMXComs.getResponseVal();
+			if(debug)
+				System.out.println("Querying run status -- Addr: " + addr + " Status: " + ret);
+			return ret;
+		}
+		
+		public static float getVoltage(){
+			waitForNMX();
+			
+			int subaddr = 0;
+			int command = 107;
+			
+			NMXComs.cmd(addr, subaddr, command);
+			float ret = (float)NMXComs.getResponseVal() / FLOAT_CONVERSION;
+			if(debug)
+				System.out.println("Querying controller voltage -- Addr: " + addr + " Version: " + ret + "V");
+			return ret;
+		}
+		
+		public static float getCurrent(){
+			waitForNMX();
+			
+			int subaddr = 0;
+			int command = 108;
+			
+			NMXComs.cmd(addr, subaddr, command);
+			float ret = (float)NMXComs.getResponseVal() / FLOAT_CONVERSION;
+			if(debug)
+				System.out.println("Querying current voltage -- Addr: " + addr + " Current: " + ret + "A");
+			return ret;
+		}
+		
+		public static float getProgramDelay(){
+			waitForNMX();
+			
+			int subaddr = 0;
+			int command = 117;
+			
+			NMXComs.cmd(addr, subaddr, command);
+			int ret = NMXComs.getResponseVal();
+			if(debug)
+				System.out.println("Querying program delay-- Addr: " + addr + " Delay: " + ret + "ms");
+			return ret;
 		}
 		
 		public static int getProgramMode(){
@@ -347,6 +547,104 @@ public class NMXCmd {
 			return ret;
 		}
 		
+		public static boolean getJoystickMode(){
+			waitForNMX();
+			
+			int subaddr = 0;
+			int command = 120;
+			
+			NMXComs.cmd(addr, subaddr, command);
+			boolean ret = NMXComs.getResponseVal() == 0 ? false : true;
+			if(debug)
+				System.out.println("Querying joystick mode -- Addr: " + addr + " Mode: " + ret);
+			return ret;
+		}
+		
+		public static boolean getPingpongMode(){
+			waitForNMX();
+			
+			int subaddr = 0;
+			int command = 121;
+			
+			NMXComs.cmd(addr, subaddr, command);
+			boolean ret = NMXComs.getResponseVal() == 0 ? false : true;
+			if(debug)
+				System.out.println("Querying pingpong mode -- Addr: " + addr + " Mode: " + ret);
+			return ret;
+		}
+		
+		public static boolean getWatchdogMode(){
+			waitForNMX();
+			
+			int subaddr = 0;
+			int command = 122;
+			
+			NMXComs.cmd(addr, subaddr, command);
+			boolean ret = NMXComs.getResponseVal() == 0 ? false : true;
+			if(debug)
+				System.out.println("Querying watchdog mode -- Addr: " + addr + " Mode: " + ret);
+			return ret;
+		}
+		
+		public static int getPercentComplete(){
+			waitForNMX();
+			
+			int subaddr = 0;
+			int command = 123;
+			
+			NMXComs.cmd(addr, subaddr, command);
+			int ret = NMXComs.getResponseVal();
+			if(debug)
+				System.out.println("Querying percent complete -- Addr: " + addr + " Completion: " + ret + "%");
+			return ret;
+		}
+		
+		public static int getMotorAttachment(){
+			waitForNMX();
+			
+			int subaddr = 0;
+			int command = 124;
+			
+			NMXComs.cmd(addr, subaddr, command);
+			int ret = NMXComs.getResponseVal();
+			if(debug)
+				System.out.println("Querying motor attachment -- Addr: " + addr + " Attachment code: " + ret);
+			return ret;
+		}						
+		
+		public static int getProgramRunTime(){
+			waitForNMX();
+			
+			int subaddr = 0;
+			int command = 125;
+			
+			NMXComs.cmd(addr, subaddr, command);
+			int ret = NMXComs.getResponseVal();
+			if(debug)
+				System.out.println("Querying program run time -- Addr: " + addr + " Run time: " + ret + "ms");
+			return ret;
+		}
+		
+		public static boolean getProgramComplete() {
+							
+			// If a command is currently being sent, wait
+			waitForNMX();
+
+			int subaddr = 0;
+			int command = 126;			
+			NMXComs.cmd(addr, subaddr, command);
+			waitForNMX();
+			boolean ret;
+			if(NMXComs.getResponseVal() > 0)
+				ret = true;
+			else
+				ret = false;
+			
+			if(debug)
+				System.out.println("Querying program complete -- Addr: " + addr + " Complete: " + ret);
+			return ret;
+		}
+		
 		public static int getFPS(){
 			// If a command is currently being sent, wait
 			waitForNMX();			
@@ -373,7 +671,6 @@ public class NMXCmd {
 				System.out.println("Querying FPS: " + ret + " -- Flag val: " + resp);
 			return ret;
 		}
-		
 		
 		public static int getFreeMemory(){
 			// If a command is currently being sent, wait
