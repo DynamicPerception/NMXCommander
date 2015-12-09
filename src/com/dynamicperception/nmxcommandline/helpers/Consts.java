@@ -55,4 +55,7 @@ public final class Consts {
 	
 	// Error codes
 	public static final int ERROR = (int) -1e9;
+	
+	// NMX Conversion Factors
+	public static final float FLOAT_CONVERSION = 100f;
 }
