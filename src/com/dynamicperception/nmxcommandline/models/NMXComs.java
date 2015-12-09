@@ -207,7 +207,7 @@ public class NMXComs {
 		}
 		
 		// Set command ready flag to trigger command thread		
-		sendingCommand = true;				
+		sendingCommand = true;
 	}
 
 	
@@ -263,10 +263,10 @@ public class NMXComs {
 				}
 
 			} catch (NumberFormatException e) {
-				System.out.println("Error parsing data");
+				System.out.println("Error parsing response: " + response);
 			}
 		} catch (NumberFormatException e) {
-			System.out.println("Error parsing data type");
+			System.out.println("Error parsing data type: " + response);
 		} catch (StringIndexOutOfBoundsException e) {
 			if(serialDetail)
 				System.out.println("Out of bounds!!!");
@@ -288,7 +288,7 @@ public class NMXComs {
 	private static class CommandThread
 	implements Runnable{
 		
-		volatile boolean execute;
+		volatile boolean execute;		
 		
 		public void run(){
 			execute = true;

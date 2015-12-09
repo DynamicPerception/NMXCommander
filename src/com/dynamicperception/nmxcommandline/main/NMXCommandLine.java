@@ -5,16 +5,18 @@ import java.util.List;
 
 import com.dynamicperception.nmxcommandline.coms.Serial;
 import com.dynamicperception.nmxcommandline.helpers.Console;
+import com.dynamicperception.nmxcommandline.models.Command;
+import com.dynamicperception.nmxcommandline.models.Command.Type;
 import com.dynamicperception.nmxcommandline.models.NMXCmd;
 import com.dynamicperception.nmxcommandline.models.NMXComs;
 
 public class NMXCommandLine {
-
+	
 	private static boolean execute;
 	private static Serial serial;
 	
+	
 	public static void main(String[] args) {
-		
 		serial = new Serial();
 		
 		Serial.checkPorts();
@@ -47,10 +49,21 @@ public class NMXCommandLine {
 		// Find the command type
 		int endOfType = input.indexOf(" ");
 		endOfType = endOfType == -1 ? input.length() : endOfType;
-		String type = input.substring(0, endOfType);
+		String typeStr = input.substring(0, endOfType);
 		
-		if(type.equals("exit")){
+		// Request to quit
+		if(typeStr.equals("exit")){
 			quit();
+		}
+		// Request to repeat command
+		else if(typeStr.equals("r")){			
+			input = input.substring(2, input.length());
+			int count = Integer.parseInt(input.substring(0, input.indexOf(DELIMITER)));			
+			input = input.substring(input.indexOf(DELIMITER)+1, input.length());			
+			for(int i = 0; i < count; i++){
+				parseCommand(input);
+			}			
+			return;
 		}
 		
 		// Find the command
@@ -59,10 +72,10 @@ public class NMXCommandLine {
 			tmpCmd = input.substring(endOfType+1, input.length());		
 		}catch(StringIndexOutOfBoundsException e){
 			// If there is no command, but there is a valid type, print the help for that type
-			if(type.equals("m")){
+			if(typeStr.equals("m")){
 				NMXCmd.Motor.Names.help();
 			}
-			else if(type.equals("g")){
+			else if(typeStr.equals("g")){
 				NMXCmd.General.Names.help();
 			}
 			// Otherwise, this was a garbage command, so ignore it
@@ -73,7 +86,7 @@ public class NMXCommandLine {
 		String cmd = tmpCmd.substring(0, endOfCmd);
 		
 		if(endOfCmd == -1){			
-			NMXCmd.execute(type, cmd, new ArrayList<Integer>());
+			NMXCmd.execute(typeStr, cmd, new ArrayList<Integer>());
 		}
 		
 		
@@ -116,7 +129,42 @@ public class NMXCommandLine {
 		}
 		
 		// Execute the command
-		NMXCmd.execute(type, cmd, args);
+		//NMXCmd.execute(typeStr, cmd, args);
+		
+		Command.Type type = null;
+		if(typeStr.equals("g")){
+			type = Type.GENERAL;
+		}
+		else if(typeStr.equals("m")){
+			type = Type.MOTOR;
+		}
+		else if(typeStr.equals("c")){
+			type = Type.CAMERA;
+		}
+		else if(typeStr.equals("k")){
+			type = Type.KEYFRAME;
+		}
+		try{			
+			Command thisCommand = Command.get(type, cmd);
+						
+			if(args.size() == 1 && args.get(0) == -1){
+				thisCommand.printInfo();			
+				return;
+			}
+			
+			if(args.size() == 0){
+				thisCommand.execute();
+			}
+			else if(args.size() == 1){
+				thisCommand.execute(args.get(0));
+			}
+			else if(args.size() == 2){
+				thisCommand.execute(args.get(0), args.get(1));
+			}			
+		}catch(UnsupportedOperationException e){
+			Console.pln("Not a valid command");
+			return;
+		}		
 	}
 	
 	private static void quit(){
@@ -125,5 +173,5 @@ public class NMXCommandLine {
 		Console.pln("Exiting application!");
 		System.exit(0);
 	}
-	
+
 }

@@ -2233,95 +2233,95 @@ public class NMXCmd {
 
 			
 			public static void help(){
-				System.out.println("\n***** General Command Directory *****\n");
-				System.out.println("General settings: \n" + SET_ADDRESS + "\n" + SET_DEBUG + "\n" + TOGGLE_LED + "\n" + SET_JOYSTICK + "\n" + SET_GRAFFIK + "\n");
-				System.out.println("General queries: \n" + GET_FIRMWARE + "\n" + GET_MEMORY + "\n" + GET_VOLTAGE + "\n" + GET_CURRENT + "\n" + GET_MOT_ATTCH + "\n" + GET_JOYSTICK + "\n" + GET_WATCHDOG + "\n");
-				System.out.println("Program settings: \n" + SET_MODE + "\n" + SET_PINGPONG + "\n" + SET_FPS + "\n");
-				System.out.println("Program control: \n" + START + "\n" + PAUSE + "\n" + STOP + "\n");
-				System.out.println("Program queries: \n" + GET_PROGRAM_MODE + "\n" + GET_FPS + "\n" + GET_PROGRAM_DELAY + "\n" + GET_PROGRAM_TIME +
-						"\n" + GET_PINGPONG + "\n" + GET_RUN_STATUS + "\n" + GET_PCT_COMP);	
+//				System.out.println("\n***** General Command Directory *****\n");
+//				System.out.println("General settings: \n" + SET_ADDRESS + "\n" + SET_DEBUG + "\n" + TOGGLE_LED + "\n" + SET_JOYSTICK + "\n" + SET_GRAFFIK + "\n");
+//				System.out.println("General queries: \n" + GET_FIRMWARE + "\n" + GET_MEMORY + "\n" + GET_VOLTAGE + "\n" + GET_CURRENT + "\n" + GET_MOT_ATTCH + "\n" + GET_JOYSTICK + "\n" + GET_WATCHDOG + "\n");
+//				System.out.println("Program settings: \n" + SET_MODE + "\n" + SET_PINGPONG + "\n" + SET_FPS + "\n");
+//				System.out.println("Program control: \n" + START + "\n" + PAUSE + "\n" + STOP + "\n");
+//				System.out.println("Program queries: \n" + GET_PROGRAM_MODE + "\n" + GET_FPS + "\n" + GET_PROGRAM_DELAY + "\n" + GET_PROGRAM_TIME +
+//						"\n" + GET_PINGPONG + "\n" + GET_RUN_STATUS + "\n" + GET_PCT_COMP);	
 			}			
 		}
 		
 		public static void command(String cmd, int data){
-			if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
-			else if(cmd.equals(Names.anObject)){
-				
-			}
+//			if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
+//			else if(cmd.equals(Names.anObject)){
+//				
+//			}
 			
 
 		}
