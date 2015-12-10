@@ -1,5 +1,12 @@
 package com.dynamicperception.nmxcommandline.main;
 
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,8 +20,8 @@ public class NMXCommandLine {
 	
 	private static boolean execute;
 	private static Serial serial;
-	final static String DELIMITER = " ";
-	
+	final static String DELIMITER = " ";	
+	private static long lastTime;
 	
 	public static void main(String[] args) {
 		serial = new Serial();
@@ -48,17 +55,21 @@ public class NMXCommandLine {
 
 	public static void parseCommand(List<String> args){		
 		
-		
-		String typeStr = "";
-		String cmdStr = "";
-		
 		// Request to quit
 		if(args.get(0).equals("exit")){
 			quit();
 		}
+		// Run command list from file
+		else if(args.get(0).equals("run")){
+			try {
+				runCommandFile();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		// Request to repeat command
-		else if(args.get(0).equals("r")){			
-			
+		else if(args.get(0).equals("r")){						
 			int count = Integer.parseInt(args.get(1));			
 			for(int i = 0; i < 2; i++){
 				args.remove(0);
@@ -70,56 +81,29 @@ public class NMXCommandLine {
 		}
 		// Find command name
 		else if(args.get(0).equals("find")){
-			if(args.size() < 3){
-				Console.pln("Invalid search syntax");
-				return;
-			}
-		
-			
-			typeStr = args.get(1);
-			String term = args.get(2);
-			if(typeStr.equals("g")){
-				Command.Names.General.find(term);
-				return;
-			}
-			else if(typeStr.equals("m")){
-				Command.Names.Motor.find(term);
-				return;
-			}
-			else if(typeStr.equals("c")){
-				return;
-			}
-			else if(typeStr.equals("k")){
-				return;
-			}
-			else{
-				Console.pln("Invalid type");
-				return;
-			}
+			findCommand(args);
+			return;			
 		}
 		// Help list
 		else if(args.size()== 1){
-			typeStr = args.get(0);
-			if(typeStr.equals("g")){
-				Command.Names.General.help();
-				return;
-			}
-			else if(typeStr.equals("m")){
-				Command.Names.Motor.help();;
-				return;
-			}
-			else if(typeStr.equals("c")){
-				return;
-			}
-			else if(typeStr.equals("k")){
-				return;
-			}
+			getHelp(args);
+			return;
 		}
+		// Normal Command
 		else{
-			typeStr = args.get(0);
-			
-			if(args.size() > 1)
-				cmdStr = args.get(1);
+			System.out.println("Last command loaded time elapsed: " + (System.nanoTime() - lastTime));
+			runCommand(args);
+			lastTime = System.nanoTime();
+		}
+	}
+	
+	private static void runCommand(List<String> args){
+		
+		String typeStr = args.get(0);
+		String cmdStr = "";
+		
+		if(args.size() > 1){
+			cmdStr = args.get(1);
 		}
 		
 		Command.Type type = null;
@@ -155,7 +139,53 @@ public class NMXCommandLine {
 		}catch(UnsupportedOperationException e){
 			Console.pln("Not a valid command");
 			return;
+		}	
+	}
+	
+	private static void findCommand(List<String> args){
+		if(args.size() < 3){
+			Console.pln("Invalid search syntax");
+			return;
 		}		
+		
+		String typeStr = args.get(1);
+		String term = args.get(2);
+		if(typeStr.equals("g")){
+			Command.Names.General.find(term);
+			return;
+		}
+		else if(typeStr.equals("m")){
+			Command.Names.Motor.find(term);
+			return;
+		}
+		else if(typeStr.equals("c")){
+			return;
+		}
+		else if(typeStr.equals("k")){
+			return;
+		}
+		else{
+			Console.pln("Invalid type");
+			return;
+		}
+	}
+	
+	private static void getHelp(List<String> args){
+		String typeStr = args.get(0);
+		if(typeStr.equals("g")){
+			Command.Names.General.help();
+			return;
+		}
+		else if(typeStr.equals("m")){
+			Command.Names.Motor.help();;
+			return;
+		}
+		else if(typeStr.equals("c")){
+			return;
+		}
+		else if(typeStr.equals("k")){
+			return;
+		}
 	}
 	
 	private static List<String> getArgs(String input){		
@@ -173,6 +203,19 @@ public class NMXCommandLine {
 		}
 		return args;		
 	}
+	
+	private static void runCommandFile() throws IOException {
+		Path path = Paths.get("c:/commandList.txt");
+		
+		// Get the list of commands
+		final Charset ENCODING = StandardCharsets.UTF_8;
+		List<String> commands = Files.readAllLines(path, ENCODING);
+		
+		// Run them
+		for(int i = 0; i < commands.size(); i++){
+			parseCommand(commands.get(i));
+		}		
+	}	
 	
 	private static void quit(){
 		if(Serial.isPortOpen())
