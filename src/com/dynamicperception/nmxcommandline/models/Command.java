@@ -613,7 +613,12 @@ public class Command {
 	
 	public <T>T execute(String dataOrMotor){
 		if(this.type == Command.Type.MOTOR){
-			int tempSubaddr = Integer.parseInt(dataOrMotor) + 1;
+			int motor = Integer.parseInt(dataOrMotor);
+			if(motor < 0 || motor > Consts.MOTOR_COUNT){
+				System.out.println("Invalid motor number");
+				throw new UnsupportedOperationException();				
+			}
+			int tempSubaddr = motor + 1;
 			return execute(tempSubaddr, "0", false);
 		}
 		else{
@@ -623,7 +628,12 @@ public class Command {
 	
 	public <T>T execute(String motor, String data){
 		if(this.type == Command.Type.MOTOR){
-			int tempSubaddr = Integer.parseInt(motor) + 1;
+			int motorNum = Integer.parseInt(motor);
+			if(motorNum < 0 || motorNum > Consts.MOTOR_COUNT){
+				System.out.println("Invalid motor number");
+				throw new UnsupportedOperationException();				
+			}
+			int tempSubaddr = motorNum + 1;
 			return execute(tempSubaddr, data, true);
 		}	
 		else{
