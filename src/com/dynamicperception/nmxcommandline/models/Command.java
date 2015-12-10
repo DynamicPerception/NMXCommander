@@ -106,6 +106,7 @@ public class Command {
 			}
 		}
 		public static class Motor {
+			//Commands
 			static final String SET_SLEEP 		= "setSleep";
 			static final String SET_ENABLE 		= "setEnable";			
 			static final String SET_BACKLASH 	= "setBacklash";
@@ -141,6 +142,7 @@ public class Command {
 			static final String SET_SPEED		= "setSpeed";
 			static final String SET_ACCEL		= "setAccel";						
 			
+			// Queries
 			static final String IS_RUNNING 		= "isRunning";
 			static final String GET_ENABLE 		= "isEnabled";			
 			static final String GET_BACKLASH 	= "getBacklash";
@@ -170,37 +172,63 @@ public class Command {
 			}
 		}
 		public static class Camera {
-			// General settings			
-			static final String SET_ENABLE 		= "setEnable";			
-			static final String SET_TEST_MODE 	= "setTestMode";			
-			static final String SET_KEEPALIVE	= "setKeepAlive";			
-			static final String EXPOSE_NOW 		= "expose";
+			//Commands
+			static final String SET_ENABLE 				= "setEnable";			
+			static final String EXPOSE_NOW 				= "expose";
+			static final String SET_TRIGGER 			= "setTrigger";
+			static final String SET_FOCUS 				= "setFocus";
+			static final String SET_MAX_SHOTS			= "setMaxShots";
+			static final String SET_DELAY	 			= "setDelay";
+			static final String SET_FOCUS_WITH_SHUTTER	= "setFocusWithShutter";
+			static final String SET_INTERVAL			= "setInterval";		
+			static final String SET_MUP		 			= "setMUP";
+			static final String SET_TEST_MODE 			= "setTestMode";
+			static final String SET_KEEPALIVE			= "setKeepAlive";
 			
-			// General queries
-			static final String GET_ENABLED		= "isEnabled";
-			static final String GET_TEST_MODE	= "getTestMode";
-			static final String GET_KEEPALIVE	= "getKeepAlive";
-			static final String GET_EXPOSING	= "isExposing";
-			
-			// Exposure settings
-			static final String SET_INTERVAL	= "setInterval";
-			static final String SET_TRIGGER 	= "setTrigger";
-			static final String SET_FOCUS 		= "setFocus";				
-			static final String SET_DELAY	 	= "setDelay";
-			static final String SET_MAX_SHOTS	= "setMaxShots";		
-			static final String SET_MUP		 	= "setMUP";			
-			
-			// Exposure queries			
-			static final String GET_SHOTS		= "getShots";	
-			static final String GET_INTERVAL	= "getInterval";
-			static final String GET_TRIGGER		= "getTrigger";
-			static final String GET_FOCUS 		= "getFocus";
-			static final String GET_DELAY	 	= "getDelay";
-			static final String GET_MAX_SHOTS 	= "getMaxShots";			
-			static final String GET_MUP 		= "getMUP";
+			// Queries
+			static final String IS_ENABLED				= "isEnabled";
+			static final String IS_EXPOSING				= "isExposing";
+			static final String GET_TRIGGER				= "getTrigger";
+			static final String GET_FOCUS 				= "getFocus";
+			static final String GET_MAX_SHOTS 			= "getMaxShots";
+			static final String GET_DELAY	 			= "getDelay";	
+			static final String GET_FOCUS_WITH_SHUTTER	= "getFocusWithShutter";
+			static final String GET_MUP 				= "getMUP";
+			static final String GET_INTERVAL			= "getInterval";			
+			static final String GET_SHOTS				= "getShots";	
+			static final String GET_TEST_MODE			= "getTestMode";
+			static final String GET_KEEPALIVE			= "getKeepAlive";
+						
 		}
 		public  static class KeyFrame {
+			// Commands
+			static final String SET_AXIS 		= "setAxis";
+			static final String SET_COUNT		= "setCount";			
+			static final String SET_ABSCISSA 	= "setAbscissa";
+			static final String SET_POS			= "setPos";
+			static final String SET_VEL			= "setVel";		
 			
+			static final String SET_UPDATE_RATE 	= "setUpdateRate";
+			static final String END_TRANSMISSION	= "endTransmission";		
+			static final String SET_CONT_VID_TIME	= "setContVidTime";
+			
+			static final String START_PROGRAM	= "startProgram";
+			static final String PAUSE_PROGRAM 	= "pauseProgram";
+			static final String STOP_PROGRAM	= "stopProgram";
+			
+			// Queries
+			static final String PRINT_INFO		= "printInfo";
+			static final String GET_COUNT 		= "getCount";			
+			static final String GET_UPDATE_RATE = "getUpdateRate";
+			static final String GET_POS_AT		= "getPosAt";
+			static final String GET_VEL_AT 		= "getVelAt";
+			static final String GET_ACCEL_AT	= "getAccelAt";			
+			static final String IS_VEL_VALID	= "isVelValid";
+			static final String IS_ACCEL_VALID	= "isAccelValid";
+			static final String IS_RUNNING 		= "isRunning";
+			static final String GET_RUN_TIME	= "getRunTime";
+			static final String GET_MAX_RUN_TIME = "getMaxRunTime";
+			static final String GET_PCT_DONE	= "getPctDone";			
 		}
 	}
 	
@@ -365,6 +393,7 @@ public class Command {
 		motorList.add(new Command(Command.Type.MOTOR, 28, Integer.class, Names.Motor.AUTO_SET_MS));
 		motorList.add(new Command(Command.Type.MOTOR, 29, Names.Motor.SET_START_HERE));
 		motorList.add(new Command(Command.Type.MOTOR, 30, Names.Motor.SET_STOP_HERE, Byte.class));
+		motorList.add(new Command(Command.Type.MOTOR, 31, Names.Motor.SEND_TO, Long.class));
 		motorList.add(new Command(Command.Type.MOTOR, 51, Names.Motor.SET_POS, Long.class));
 		
 		// Queries
@@ -391,11 +420,62 @@ public class Command {
 	}
 	
 	private static void initCameraCommands(){
+		// Commands		
+		cameraList.add(new Command(Command.Type.CAMERA, 2, Names.Camera.SET_ENABLE, Integer.class));
+		cameraList.add(new Command(Command.Type.CAMERA, 3, Names.Camera.EXPOSE_NOW, Integer.class));
+		cameraList.add(new Command(Command.Type.CAMERA, 4, Names.Camera.SET_TRIGGER, Integer.class));
+		cameraList.add(new Command(Command.Type.CAMERA, 5, Names.Camera.SET_FOCUS, Integer.class));
+		cameraList.add(new Command(Command.Type.CAMERA, 6, Names.Camera.SET_MAX_SHOTS, Integer.class));
+		cameraList.add(new Command(Command.Type.CAMERA, 7, Names.Camera.SET_DELAY, Integer.class));
+		cameraList.add(new Command(Command.Type.CAMERA, 8, Names.Camera.SET_FOCUS_WITH_SHUTTER));
+		cameraList.add(new Command(Command.Type.CAMERA, 9, Names.Camera.SET_MUP, Integer.class));
+		cameraList.add(new Command(Command.Type.CAMERA, 10, Names.Camera.SET_INTERVAL));
+		cameraList.add(new Command(Command.Type.CAMERA, 11, Names.Camera.SET_TEST_MODE));
+		cameraList.add(new Command(Command.Type.CAMERA, 12, Names.Camera.SET_KEEPALIVE));
 		
+		// Queries		
+		cameraList.add(new Command(Command.Type.CAMERA, 100, Integer.class, Names.Camera.IS_ENABLED));
+		cameraList.add(new Command(Command.Type.CAMERA, 101, Integer.class, Names.Camera.IS_EXPOSING));
+		cameraList.add(new Command(Command.Type.CAMERA, 102, Integer.class, Names.Camera.GET_TRIGGER));
+		cameraList.add(new Command(Command.Type.CAMERA, 103, Integer.class, Names.Camera.GET_FOCUS));
+		cameraList.add(new Command(Command.Type.CAMERA, 104, Integer.class, Names.Camera.GET_MAX_SHOTS));
+		cameraList.add(new Command(Command.Type.CAMERA, 105, Integer.class, Names.Camera.GET_DELAY));
+		cameraList.add(new Command(Command.Type.CAMERA, 106, Integer.class, Names.Camera.GET_FOCUS_WITH_SHUTTER));
+		cameraList.add(new Command(Command.Type.CAMERA, 107, Integer.class, Names.Camera.GET_MUP));		
+		cameraList.add(new Command(Command.Type.CAMERA, 108, Integer.class, Names.Camera.GET_INTERVAL));
+		cameraList.add(new Command(Command.Type.CAMERA, 109, Integer.class, Names.Camera.GET_SHOTS));
+		cameraList.add(new Command(Command.Type.CAMERA, 110, Integer.class, Names.Camera.GET_TEST_MODE));
+		cameraList.add(new Command(Command.Type.CAMERA, 111, Integer.class, Names.Camera.GET_KEEPALIVE));
 	}
 	
 	private static void initKeyFrameCommands(){
+		// Commands		
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 10, Integer.class, Names.KeyFrame.SET_AXIS, Integer.class));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 11, Integer.class, Names.KeyFrame.SET_COUNT, Integer.class));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 12, Float.class, Names.KeyFrame.SET_ABSCISSA, Integer.class));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 13, Float.class, Names.KeyFrame.SET_POS, Integer.class));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 14, Float.class, Names.KeyFrame.SET_VEL, Integer.class));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 15, Integer.class, Names.KeyFrame.SET_UPDATE_RATE, Integer.class));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 16, Names.KeyFrame.END_TRANSMISSION));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 17, Float.class, Names.KeyFrame.SET_CONT_VID_TIME, Integer.class));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 20, Names.KeyFrame.START_PROGRAM));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 21, Names.KeyFrame.PAUSE_PROGRAM));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 22, Names.KeyFrame.STOP_PROGRAM));
 		
+		// Queries		
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 99, Names.KeyFrame.PRINT_INFO));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 100, Names.KeyFrame.GET_COUNT, Integer.class));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 101, Names.KeyFrame.GET_UPDATE_RATE, Integer.class));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 102, Float.class, Names.KeyFrame.GET_POS_AT, Float.class));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 103, Float.class, Names.KeyFrame.GET_VEL_AT, Float.class));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 104, Float.class, Names.KeyFrame.GET_ACCEL_AT, Float.class));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 105, Names.KeyFrame.IS_VEL_VALID));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 106, Names.KeyFrame.IS_ACCEL_VALID, Boolean.class));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 120, Names.KeyFrame.IS_RUNNING, Boolean.class));
+		
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 121, Names.KeyFrame.GET_RUN_TIME, Long.class));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 122, Names.KeyFrame.GET_MAX_RUN_TIME, Long.class));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 123, Names.KeyFrame.GET_PCT_DONE, Integer.class));
 	}
 	
 	/** 
