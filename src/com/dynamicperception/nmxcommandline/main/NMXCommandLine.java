@@ -14,6 +14,7 @@ public class NMXCommandLine {
 	
 	private static boolean execute;
 	private static Serial serial;
+	final static String DELIMITER = " ";
 	
 	
 	public static void main(String[] args) {
@@ -41,10 +42,10 @@ public class NMXCommandLine {
 		String cmd = Console.getString();			
 		parseCommand(cmd);
 	}
-	
-	public static void parseCommand(String input){
+
+	public static void parseCommand(String input){		
 		
-		final String DELIMITER = " ";
+		String[] testArgs = getArgs(input);		
 		
 		// Find the command type
 		int endOfType = input.indexOf(" ");
@@ -52,11 +53,11 @@ public class NMXCommandLine {
 		String typeStr = input.substring(0, endOfType);
 		
 		// Request to quit
-		if(typeStr.equals("exit")){
+		if(testArgs[0].equals("exit")){
 			quit();
 		}
 		// Request to repeat command
-		else if(typeStr.equals("r")){			
+		else if(testArgs[0].equals("r")){			
 			input = input.substring(2, input.length());
 			int count = Integer.parseInt(input.substring(0, input.indexOf(DELIMITER)));			
 			input = input.substring(input.indexOf(DELIMITER)+1, input.length());			
@@ -64,6 +65,25 @@ public class NMXCommandLine {
 				parseCommand(input);
 			}			
 			return;
+		}
+		// Find command name
+		else if(testArgs[0].equals("find")){
+			String type = testArgs[1];
+			String term = testArgs[2];
+			if(type.equals("g")){
+				Command.Names.General.find(term);
+				return;
+			}
+			else if(type.equals("m")){
+				Command.Names.Motor.find(term);
+				return;
+			}
+			else if(type.equals("c")){
+				return;
+			}
+			else if(type.equals("k")){
+				return;
+			}
 		}
 		
 		// Find the command
@@ -73,10 +93,10 @@ public class NMXCommandLine {
 		}catch(StringIndexOutOfBoundsException e){
 			// If there is no command, but there is a valid type, print the help for that type
 			if(typeStr.equals("m")){
-				NMXCmd.Motor.Names.help();
+				Command.Names.Motor.help();
 			}
 			else if(typeStr.equals("g")){
-				NMXCmd.General.Names.help();
+				Command.Names.General.help();
 			}
 			// Otherwise, this was a garbage command, so ignore it
 			return;
@@ -91,24 +111,8 @@ public class NMXCommandLine {
 		
 		
 		// Find the number of arguments
-		boolean searching = true;
 		tmpCmd = input.substring(endOfCmd+2, input.length());
-		int argCount = 0;		
-
-		while(searching){			
-			int i = tmpCmd.indexOf(DELIMITER);			
-			if(i == -1){
-				// Reset the substring
-				tmpCmd = input.substring(endOfCmd+2, input.length());
-				searching = false;				
-			}
-			else{
-				// Add to the argument count
-				argCount++;				
-				// Trim the string
-				tmpCmd = tmpCmd.substring(i+1, tmpCmd.length());				
-			}
-		}
+		int argCount = input.length() - input.replace(" ", "").length();	
 		
 		// Extract the arguments
 		List<Integer> args = new ArrayList<Integer>();
@@ -165,6 +169,22 @@ public class NMXCommandLine {
 			Console.pln("Not a valid command");
 			return;
 		}		
+	}
+	
+	private static String[] getArgs(String input){
+		int argCount = input.length() - input.replace(DELIMITER, "").length() + 1;
+		String[] args = new String[argCount];
+		for(int i = 0; i < argCount; i++){
+			if(i == argCount-1){
+				args[i] = input;
+			}
+			else{
+				int index = input.indexOf(DELIMITER);
+				args[i] = input.substring(0, index);
+				input = input.substring(index + 1, input.length());
+			}
+		}
+		return args;		
 	}
 	
 	private static void quit(){
