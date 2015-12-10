@@ -19,8 +19,9 @@ public class Command {
 	private Type type;
 	private int subaddr;
 	private int command;
-	private int dataLength;	
-	private Class<?> returnType;
+	private Class<?> dataType;
+	private int dataLength;
+	private Class<?> returnType;	
 	
 	public static class Names{
 		public static class General {
@@ -207,24 +208,36 @@ public class Command {
 		GENERAL, MOTOR, CAMERA, KEYFRAME;
 	}
 	
+	public static enum Length{
+		NULL, BYTE, INT, LONG, FLOAT;
+	}
+	
 	/* Constructor and Initialization Method */
 	
-	// Commands that transmit one or more data bytes
-	Command(Command.Type type, int command, Class<?> returnType, String name, int dataLength){		
-		this.init(type, command, returnType, name, dataLength);
+	// Commands that transmit one or more data bytes	
+	Command(Command.Type type, int command, Class<?> returnType, String name, Class<?> dataType){		
+		this.init(type, command, returnType, name, dataType);
+	}
+	
+	Command(Command.Type type, int command, String name, Class<?> dataType){		
+		this.init(type, command, Void.class, name, dataType);
 	}
 	
 	// Commands that transmit no additional data
 	Command(Command.Type type, int command, Class<?> returnType, String name){
-		this.init(type, command, returnType, name, 0);
+		this.init(type, command, returnType, name, Void.class);
+	}
+	
+	Command(Command.Type type, int command, String name){
+		this.init(type, command, Void.class, name, Void.class);
 	}	
 	
-	private void init(Command.Type type, int command, Class<?> returnType, String name, int dataLength){
+	private void init(Command.Type type, int command, Class<?> returnType, String name, Class<?> dataType){
 		this.name = name;
 		this.type = type;
 		this.command = command;			
 		this.returnType = returnType;
-		this.dataLength = dataLength;	
+		this.dataType = dataType;	
 		if(type == Command.Type.GENERAL){
 			this.subaddr = 0;
 		}	
@@ -237,6 +250,8 @@ public class Command {
 		else if(type == Command.Type.KEYFRAME){
 			this.subaddr = 5;
 		}
+		this.dataType = dataType;
+		this.dataLength = dataType == Byte.class ? 1 : dataType == Integer.class ? 2 : dataType == Long.class || dataType == Float.class ? 4 : 0;
 	}
 
 	
@@ -252,37 +267,37 @@ public class Command {
 	
 	private static void initGeneralCommands(){
 		// Create the general commands		
-		generalList.add(new Command(Command.Type.GENERAL, 2, Void.class, Names.General.START_PROGRAM));
-		generalList.add(new Command(Command.Type.GENERAL, 3, Void.class, Names.General.PAUSE_PROGRAM));
-		generalList.add(new Command(Command.Type.GENERAL, 4, Void.class, Names.General.STOP_PROGRAM));
-		generalList.add(new Command(Command.Type.GENERAL, 5, Void.class, Names.General.TOGGLE_LED));
-		generalList.add(new Command(Command.Type.GENERAL, 6, Void.class, Names.General.SET_TIMING_MASTER));
-		generalList.add(new Command(Command.Type.GENERAL, 7, Void.class, Names.General.SET_NAME));
-		generalList.add(new Command(Command.Type.GENERAL, 8, Void.class, Names.General.SET_ADDRESS, Consts.BYTE_SIZE));
-		generalList.add(new Command(Command.Type.GENERAL, 9, Void.class, Names.General.SET_COMMON_LINE, Consts.BYTE_SIZE));
-		generalList.add(new Command(Command.Type.GENERAL, 10, Void.class, Names.General.SEND_ALL_MOTORS_HOME));
-		generalList.add(new Command(Command.Type.GENERAL, 11, Void.class, Names.General.SET_MAX_STEP_RATE, Consts.INT_SIZE));
-		generalList.add(new Command(Command.Type.GENERAL, 12, Void.class, Names.General.SET_INPUT_EDGE, Consts.BYTE_SIZE));
-		generalList.add(new Command(Command.Type.GENERAL, 13, Void.class, Names.General.SET_ALT_IO_MODE, Consts.INT_SIZE));
-		generalList.add(new Command(Command.Type.GENERAL, 14, Void.class, Names.General.SET_WATCHDOG, Consts.BYTE_SIZE));
-		generalList.add(new Command(Command.Type.GENERAL, 15, Void.class, Names.General.SET_ALT_OUT_B4_SHOT_DELAY_TIME, Consts.INT_SIZE));
-		generalList.add(new Command(Command.Type.GENERAL, 16, Void.class, Names.General.SET_ALT_OUT_AFTER_SHOT_DELAY_TIME, Consts.INT_SIZE));
-		generalList.add(new Command(Command.Type.GENERAL, 17, Void.class, Names.General.SET_ALT_OUT_B4_SHOT_TIME, Consts.INT_SIZE));
-		generalList.add(new Command(Command.Type.GENERAL, 18, Void.class, Names.General.SET_ALT_OUT_AFTER_SHOT_TIME, Consts.INT_SIZE));
-		generalList.add(new Command(Command.Type.GENERAL, 19, Void.class, Names.General.SET_ALT_OUT_TRIGGER_LEVEL, Consts.BYTE_SIZE));
-		generalList.add(new Command(Command.Type.GENERAL, 20, Void.class, Names.General.SET_MAX_PROGRAM_TIME, Consts.LONG_SIZE));
-		generalList.add(new Command(Command.Type.GENERAL, 21, Void.class, Names.General.SET_PROGRAM_DELAY, Consts.LONG_SIZE));
-		generalList.add(new Command(Command.Type.GENERAL, 22, Void.class, Names.General.SET_PROGRAM_MODE, Consts.BYTE_SIZE));
-		generalList.add(new Command(Command.Type.GENERAL, 23, Void.class, Names.General.SET_JOYSTICK, Consts.BYTE_SIZE));
-		generalList.add(new Command(Command.Type.GENERAL, 24, Void.class, Names.General.SET_PINGPONG, Consts.BYTE_SIZE));
-		generalList.add(new Command(Command.Type.GENERAL, 25, Void.class, Names.General.SEND_ALL_MOTORS_START));
-		generalList.add(new Command(Command.Type.GENERAL, 26, Void.class, Names.General.SET_START_HERE));
-		generalList.add(new Command(Command.Type.GENERAL, 27, Void.class, Names.General.SET_STOP_HERE));
-		generalList.add(new Command(Command.Type.GENERAL, 28, Void.class, Names.General.SET_FPS, Consts.BYTE_SIZE));
-		generalList.add(new Command(Command.Type.GENERAL, 29, Void.class, Names.General.REVERSE_START_STOP));
-		generalList.add(new Command(Command.Type.GENERAL, 50, Void.class, Names.General.SET_GRAFFIK, Consts.BYTE_SIZE));
-		generalList.add(new Command(Command.Type.GENERAL, 51, Void.class, Names.General.SET_APP, Consts.BYTE_SIZE));
-		generalList.add(new Command(Command.Type.GENERAL, 52, Void.class, Names.General.SET_PROGRAM_DELAY, Consts.LONG_SIZE));
+		generalList.add(new Command(Command.Type.GENERAL, 2, Names.General.START_PROGRAM));
+		generalList.add(new Command(Command.Type.GENERAL, 3, Names.General.PAUSE_PROGRAM));
+		generalList.add(new Command(Command.Type.GENERAL, 4, Names.General.STOP_PROGRAM));
+		generalList.add(new Command(Command.Type.GENERAL, 5, Names.General.TOGGLE_LED));
+		generalList.add(new Command(Command.Type.GENERAL, 6, Names.General.SET_TIMING_MASTER));
+		generalList.add(new Command(Command.Type.GENERAL, 7, Names.General.SET_NAME));
+		generalList.add(new Command(Command.Type.GENERAL, 8, Names.General.SET_ADDRESS, Byte.class));
+		generalList.add(new Command(Command.Type.GENERAL, 9, Names.General.SET_COMMON_LINE, Byte.class));
+		generalList.add(new Command(Command.Type.GENERAL, 10, Names.General.SEND_ALL_MOTORS_HOME));
+		generalList.add(new Command(Command.Type.GENERAL, 11, Names.General.SET_MAX_STEP_RATE, Integer.class));
+		generalList.add(new Command(Command.Type.GENERAL, 12, Names.General.SET_INPUT_EDGE, Byte.class));
+		generalList.add(new Command(Command.Type.GENERAL, 13, Names.General.SET_ALT_IO_MODE, Integer.class));
+		generalList.add(new Command(Command.Type.GENERAL, 14, Names.General.SET_WATCHDOG, Byte.class));
+		generalList.add(new Command(Command.Type.GENERAL, 15, Names.General.SET_ALT_OUT_B4_SHOT_DELAY_TIME, Integer.class));
+		generalList.add(new Command(Command.Type.GENERAL, 16, Names.General.SET_ALT_OUT_AFTER_SHOT_DELAY_TIME, Integer.class));
+		generalList.add(new Command(Command.Type.GENERAL, 17, Names.General.SET_ALT_OUT_B4_SHOT_TIME, Integer.class));
+		generalList.add(new Command(Command.Type.GENERAL, 18, Names.General.SET_ALT_OUT_AFTER_SHOT_TIME, Integer.class));
+		generalList.add(new Command(Command.Type.GENERAL, 19, Names.General.SET_ALT_OUT_TRIGGER_LEVEL, Byte.class));
+		generalList.add(new Command(Command.Type.GENERAL, 20, Names.General.SET_MAX_PROGRAM_TIME, Long.class));
+		generalList.add(new Command(Command.Type.GENERAL, 21, Names.General.SET_PROGRAM_DELAY, Long.class));
+		generalList.add(new Command(Command.Type.GENERAL, 22, Names.General.SET_PROGRAM_MODE, Byte.class));
+		generalList.add(new Command(Command.Type.GENERAL, 23, Names.General.SET_JOYSTICK, Byte.class));
+		generalList.add(new Command(Command.Type.GENERAL, 24, Names.General.SET_PINGPONG, Byte.class));
+		generalList.add(new Command(Command.Type.GENERAL, 25, Names.General.SEND_ALL_MOTORS_START));
+		generalList.add(new Command(Command.Type.GENERAL, 26, Names.General.SET_START_HERE));
+		generalList.add(new Command(Command.Type.GENERAL, 27, Names.General.SET_STOP_HERE));
+		generalList.add(new Command(Command.Type.GENERAL, 28, Names.General.SET_FPS, Byte.class));
+		generalList.add(new Command(Command.Type.GENERAL, 29, Names.General.REVERSE_START_STOP));
+		generalList.add(new Command(Command.Type.GENERAL, 50, Names.General.SET_GRAFFIK, Byte.class));
+		generalList.add(new Command(Command.Type.GENERAL, 51, Names.General.SET_APP, Byte.class));
+		generalList.add(new Command(Command.Type.GENERAL, 52, Names.General.SET_PROGRAM_DELAY, Long.class));
 		
 		// Queries
 		generalList.add(new Command(Command.Type.GENERAL, 100, Integer.class, Names.General.GET_FIRMWARE));
@@ -305,10 +320,10 @@ public class Command {
 		generalList.add(new Command(Command.Type.GENERAL, 117, Integer.class, Names.General.GET_PROGRAM_DELAY));
 		generalList.add(new Command(Command.Type.GENERAL, 118, Integer.class, Names.General.GET_PROGRAM_MODE));
 		generalList.add(new Command(Command.Type.GENERAL, 119, Integer.class, Names.General.GET_POWER_CYCLED));
-		generalList.add(new Command(Command.Type.GENERAL, 120, Integer.class, Names.General.GET_JOYSTICK));
-		generalList.add(new Command(Command.Type.GENERAL, 121, Integer.class, Names.General.GET_PINGPONG));
-		generalList.add(new Command(Command.Type.GENERAL, 122, Integer.class, Names.General.GET_WATCHDOG));
-		generalList.add(new Command(Command.Type.GENERAL, 123, Integer.class, Names.General.GET_PCT_COMP));
+		generalList.add(new Command(Command.Type.GENERAL, 120, Boolean.class, Names.General.GET_JOYSTICK));
+		generalList.add(new Command(Command.Type.GENERAL, 121, Boolean.class, Names.General.GET_PINGPONG));
+		generalList.add(new Command(Command.Type.GENERAL, 122, Boolean.class, Names.General.GET_WATCHDOG));
+		generalList.add(new Command(Command.Type.GENERAL, 123, Boolean.class, Names.General.GET_PCT_COMP));
 		generalList.add(new Command(Command.Type.GENERAL, 124, Integer.class, Names.General.GET_MOT_ATTCH));
 		generalList.add(new Command(Command.Type.GENERAL, 125, Integer.class, Names.General.GET_TOTAL_RUN_TIME));
 		generalList.add(new Command(Command.Type.GENERAL, 126, Boolean.class, Names.General.IS_PROGRAM_COMPLETE));
@@ -321,36 +336,36 @@ public class Command {
 	
 	private static void initMotorCommands(){
 		// Create the general commands		
-		motorList.add(new Command(Command.Type.MOTOR, 2, Void.class, Names.Motor.SET_SLEEP, Consts.BYTE_SIZE));
-		motorList.add(new Command(Command.Type.MOTOR, 3, Void.class, Names.Motor.SET_ENABLE, Consts.BYTE_SIZE));
-		motorList.add(new Command(Command.Type.MOTOR, 4, Void.class, Names.Motor.STOP_MOTOR));
-		motorList.add(new Command(Command.Type.MOTOR, 5, Void.class, Names.Motor.SET_BACKLASH, Consts.INT_SIZE));
-		motorList.add(new Command(Command.Type.MOTOR, 6, Void.class, Names.Motor.SET_MICROSTEPS, Consts.BYTE_SIZE));
-		motorList.add(new Command(Command.Type.MOTOR, 7, Void.class, Names.Motor.SET_MAX_SPEED, Consts.INT_SIZE));
-		motorList.add(new Command(Command.Type.MOTOR, 8, Void.class, Names.Motor.SET_DIR, Consts.BYTE_SIZE));
-		motorList.add(new Command(Command.Type.MOTOR, 9, Void.class, Names.Motor.SET_HOME));
-		motorList.add(new Command(Command.Type.MOTOR, 10, Void.class, Names.Motor.SET_END_HERE));
-		motorList.add(new Command(Command.Type.MOTOR, 11, Void.class, Names.Motor.SEND_HOME));
-		motorList.add(new Command(Command.Type.MOTOR, 12, Void.class, Names.Motor.SEND_END));
-		motorList.add(new Command(Command.Type.MOTOR, 13, Void.class, Names.Motor.SET_SPEED, Consts.FLOAT_SIZE));
-		motorList.add(new Command(Command.Type.MOTOR, 14, Void.class, Names.Motor.SET_ACCEL, Consts.FLOAT_SIZE));
+		motorList.add(new Command(Command.Type.MOTOR, 2, Names.Motor.SET_SLEEP, Byte.class));
+		motorList.add(new Command(Command.Type.MOTOR, 3, Names.Motor.SET_ENABLE, Byte.class));
+		motorList.add(new Command(Command.Type.MOTOR, 4, Names.Motor.STOP_MOTOR));
+		motorList.add(new Command(Command.Type.MOTOR, 5, Names.Motor.SET_BACKLASH, Integer.class));
+		motorList.add(new Command(Command.Type.MOTOR, 6, Names.Motor.SET_MICROSTEPS, Byte.class));
+		motorList.add(new Command(Command.Type.MOTOR, 7, Names.Motor.SET_MAX_SPEED, Integer.class));
+		motorList.add(new Command(Command.Type.MOTOR, 8, Names.Motor.SET_DIR, Byte.class));
+		motorList.add(new Command(Command.Type.MOTOR, 9, Names.Motor.SET_HOME));
+		motorList.add(new Command(Command.Type.MOTOR, 10, Names.Motor.SET_END_HERE));
+		motorList.add(new Command(Command.Type.MOTOR, 11, Names.Motor.SEND_HOME));
+		motorList.add(new Command(Command.Type.MOTOR, 12, Names.Motor.SEND_END));
+		motorList.add(new Command(Command.Type.MOTOR, 13, Names.Motor.SET_SPEED, Float.class));
+		motorList.add(new Command(Command.Type.MOTOR, 14, Names.Motor.SET_ACCEL, Float.class));
 		
-		motorList.add(new Command(Command.Type.MOTOR, 16, Void.class, Names.Motor.SET_START, Consts.LONG_SIZE));
-		motorList.add(new Command(Command.Type.MOTOR, 17, Void.class, Names.Motor.SET_STOP, Consts.LONG_SIZE));
-		motorList.add(new Command(Command.Type.MOTOR, 18, Void.class, Names.Motor.SET_EASING, Consts.BYTE_SIZE));
-		motorList.add(new Command(Command.Type.MOTOR, 19, Void.class, Names.Motor.SET_LEAD_IN, Consts.LONG_SIZE));
-		motorList.add(new Command(Command.Type.MOTOR, 20, Void.class, Names.Motor.SET_TRAVEL, Consts.LONG_SIZE));
-		motorList.add(new Command(Command.Type.MOTOR, 21, Void.class, Names.Motor.SET_PROG_ACCEL, Consts.LONG_SIZE));
-		motorList.add(new Command(Command.Type.MOTOR, 22, Void.class, Names.Motor.SET_PROG_DECEL, Consts.LONG_SIZE));
-		motorList.add(new Command(Command.Type.MOTOR, 23, Void.class, Names.Motor.SEND_START));
-		motorList.add(new Command(Command.Type.MOTOR, 24, Void.class, Names.Motor.SEND_STOP));
-		motorList.add(new Command(Command.Type.MOTOR, 25, Void.class, Names.Motor.SET_LEAD_OUT, Consts.LONG_SIZE));
+		motorList.add(new Command(Command.Type.MOTOR, 16, Names.Motor.SET_START, Long.class));
+		motorList.add(new Command(Command.Type.MOTOR, 17, Names.Motor.SET_STOP, Long.class));
+		motorList.add(new Command(Command.Type.MOTOR, 18, Names.Motor.SET_EASING, Byte.class));
+		motorList.add(new Command(Command.Type.MOTOR, 19, Names.Motor.SET_LEAD_IN, Long.class));
+		motorList.add(new Command(Command.Type.MOTOR, 20, Names.Motor.SET_TRAVEL, Long.class));
+		motorList.add(new Command(Command.Type.MOTOR, 21, Names.Motor.SET_PROG_ACCEL, Long.class));
+		motorList.add(new Command(Command.Type.MOTOR, 22, Names.Motor.SET_PROG_DECEL, Long.class));
+		motorList.add(new Command(Command.Type.MOTOR, 23, Names.Motor.SEND_START));
+		motorList.add(new Command(Command.Type.MOTOR, 24, Names.Motor.SEND_STOP));
+		motorList.add(new Command(Command.Type.MOTOR, 25, Names.Motor.SET_LEAD_OUT, Long.class));
 		
-		motorList.add(new Command(Command.Type.MOTOR, 27, Void.class, Names.Motor.RESET_LIMITS));
+		motorList.add(new Command(Command.Type.MOTOR, 27, Names.Motor.RESET_LIMITS));
 		motorList.add(new Command(Command.Type.MOTOR, 28, Integer.class, Names.Motor.AUTO_SET_MS));
-		motorList.add(new Command(Command.Type.MOTOR, 29, Void.class, Names.Motor.SET_START_HERE));
-		motorList.add(new Command(Command.Type.MOTOR, 30, Void.class, Names.Motor.SET_STOP_HERE, Consts.BYTE_SIZE));
-		motorList.add(new Command(Command.Type.MOTOR, 51, Void.class, Names.Motor.SET_POS, Consts.LONG_SIZE));
+		motorList.add(new Command(Command.Type.MOTOR, 29, Names.Motor.SET_START_HERE));
+		motorList.add(new Command(Command.Type.MOTOR, 30, Names.Motor.SET_STOP_HERE, Byte.class));
+		motorList.add(new Command(Command.Type.MOTOR, 51, Names.Motor.SET_POS, Long.class));
 		
 		// Queries
 		motorList.add(new Command(Command.Type.MOTOR, 100, Boolean.class, Names.Motor.GET_ENABLE));
@@ -361,7 +376,7 @@ public class Command {
 		motorList.add(new Command(Command.Type.MOTOR, 105, Integer.class, Names.Motor.GET_END));
 		motorList.add(new Command(Command.Type.MOTOR, 106, Integer.class, Names.Motor.GET_POS));
 		motorList.add(new Command(Command.Type.MOTOR, 107, Boolean.class, Names.Motor.IS_RUNNING));
-		motorList.add(new Command(Command.Type.MOTOR, 108, Float.class, Names.Motor.SET_SPEED));
+		motorList.add(new Command(Command.Type.MOTOR, 108, Float.class, Names.Motor.GET_SPEED));
 		motorList.add(new Command(Command.Type.MOTOR, 109, Float.class, Names.Motor.GET_ACCEL));
 		motorList.add(new Command(Command.Type.MOTOR, 110, Integer.class, Names.Motor.GET_EASING));
 		motorList.add(new Command(Command.Type.MOTOR, 111, Integer.class, Names.Motor.GET_START));
@@ -512,23 +527,23 @@ public class Command {
 			throw new UnsupportedOperationException();
 		}
 		else{
-			return execute(this.subaddr, 0, false);			
+			return execute(this.subaddr, "0", false);			
 		}
 	}
 	
-	public <T>T execute(int dataOrMotor){
+	public <T>T execute(String dataOrMotor){
 		if(this.type == Command.Type.MOTOR){
-			int tempSubaddr = dataOrMotor + 1;
-			return execute(tempSubaddr, 0, false);
+			int tempSubaddr = Integer.parseInt(dataOrMotor) + 1;
+			return execute(tempSubaddr, "0", false);
 		}
 		else{
 			return execute(this.subaddr, dataOrMotor, true);
 		}
 	}
 	
-	public <T>T execute(int motor, int data){
+	public <T>T execute(String motor, String data){
 		if(this.type == Command.Type.MOTOR){
-			int tempSubaddr = motor + 1;
+			int tempSubaddr = Integer.parseInt(motor) + 1;
 			return execute(tempSubaddr, data, true);
 		}	
 		else{
@@ -538,15 +553,24 @@ public class Command {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private <T>T execute(int subaddr, int data, boolean hasData){
-		
-		//System.out.println("Address: " + Command.addr + " Subaddr: " + subaddr + " Command: " + this.command + " Data: " + data);		
-		
+	private <T>T execute(int subaddr, String dataStr, boolean hasData){
+
 		// Notify if data is attached to a command that does not take additional data
 		if(dataLength == 0 && hasData){			
 			System.out.println("This command does not send additional data");			
 			throw new UnsupportedOperationException();
 		}
+		
+		// Parse the data, if necessary
+		int data = 0;		
+		if(hasData){						
+			if(dataType == Float.class){
+				data = Float.floatToIntBits(Float.parseFloat(dataStr));
+			}
+			else{
+				data = (int) Math.round(Float.parseFloat(dataStr));
+			}
+		}		
 		
 		// Wait for the NMX to clear
 		waitForNMX();	
