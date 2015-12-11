@@ -653,20 +653,25 @@ public class Command {
 		
 		// Parse the data, if necessary
 		int data = 0;		
-		if(hasData){						
-			if(dataType == Float.class){
+		if(hasData){			
+			
+			if(dataStr.equals("rand")){
+				float speed = (float)(Math.random() * 10000) - 5000;
+				data = Float.floatToIntBits(speed);
+				System.out.println("Setting speed to: " + speed + " steps/s");
+			}
+			else if(dataType == Float.class){
 				data = Float.floatToIntBits(Float.parseFloat(dataStr));
 			}
 			else{
 				data = (int) Math.round(Float.parseFloat(dataStr));
 			}
 		}		
-		
-		// Wait for the NMX to clear
-		waitForNMX();	
+	
+		//System.out.println("Command out: " + addr + " " + subaddr + " " + command + " " + dataLength + " " + data);
 		
 		// Send the command to the NMX
-		if(hasData){
+		if(hasData){			
 			NMXComs.cmd(addr, subaddr, command, dataLength, data);
 		}
 		else{
@@ -693,9 +698,9 @@ public class Command {
 		}
 		
 		// Print debug if necessary
-		if(debug){
+		//if(debug){
 			System.out.println("Command: " + this.name);
-		}
+		//}
 		if(ret != null)
 			System.out.println(ret);
 		else
