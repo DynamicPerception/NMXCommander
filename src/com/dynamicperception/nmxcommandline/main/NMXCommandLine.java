@@ -59,6 +59,10 @@ public class NMXCommandLine {
 		if(args.get(0).equals("exit")){
 			quit();
 		}
+		// Skip if it's a comment line
+		else if(args.get(0).indexOf("//") != -1){
+			return;
+		}
 		// Run command list from file
 		else if(args.get(0).equals("run")){
 			try {
