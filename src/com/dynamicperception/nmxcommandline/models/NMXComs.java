@@ -29,6 +29,8 @@ public class NMXComs {
 	private static int responseDelay = 50;	
 	private static String response = "";
 	private static int responseVal;
+	
+	private static int emptyResponseCount = 0;
 			
 	// Response delay options
 	protected static class ResponseTiming{		
@@ -176,6 +178,8 @@ public class NMXComs {
 	 */
 	public static void cmd(int addr, int _subAddr, int _command, int _length, int _data, boolean getResponse) throws InterruptedException {
 		
+		responseOn = getResponse;
+		
 		// Lock the NMX communications class
 		NMXComsBusy = true;
 
@@ -225,6 +229,10 @@ public class NMXComs {
 		}
 		return data;
 	}
+	
+	public static int getEmptyResponseCount(){
+		return emptyResponseCount;
+	}
 
 	/**
 	 * This method extracts any value passed from the controller in its response packet.
@@ -234,6 +242,11 @@ public class NMXComs {
 	 * be adjusted with the setTimingDelay() method.
 	 */
 	private static void parseResponse() {		
+		
+		if(!responseOn){
+			responseVal = Consts.ERROR;
+			return;
+		}
 
 		if(serialDetail)
 			System.out.println("Response before parsing: " + response);
@@ -244,8 +257,10 @@ public class NMXComs {
 		if(response.equals("")){
 			System.out.println("Empty response!");
 			responseVal = Consts.ERROR;
+			emptyResponseCount++;
 			return;
 		}
+		emptyResponseCount = 0;
 
 		// int length = Integer.decode("0x" + response.substring(18, 20));
 		int data_type = 7;
@@ -329,7 +344,7 @@ public class NMXComs {
 						responseDelay = ResponseTiming.DEFAULT;
 					}
 					else if(!responseOn){
-						ThreadManagement.message("Not waiting for response");
+						//ThreadManagement.message("Not waiting for response");
 						responseDelay = ResponseTiming.NO_RESPONSE;
 					}
 					
@@ -355,7 +370,7 @@ public class NMXComs {
 						String debug = inByte[i] <= 15 ? "0" + Integer.toHexString(inByte[i]) : Integer.toHexString(inByte[i]);
 						response = response + debug;
 					}			
-					// Extract the data from the response packet
+					// Extract the data from the response packet					
 					parseResponse();
 					
 					if(serialDetail)

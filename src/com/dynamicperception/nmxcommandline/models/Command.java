@@ -285,7 +285,48 @@ public class Command {
 	
 	/* Static Methods */
 	
-	public static void initalizeCommands(){
+	public static String getCommandName(int subAddr, int command){
+		Command.checkInitialization();
+		if(subAddr >= 1 && subAddr <= 3)
+			subAddr = 1;
+		
+		switch(subAddr){
+		case 0:
+			for(Command thisCommand : generalList){
+				if(thisCommand.getCommandNum() == command){
+					return thisCommand.getName();
+				}
+			}
+			break;
+		case 1:
+			for(Command thisCommand : motorList){
+				if(thisCommand.getCommandNum() == command){
+					return thisCommand.getName();
+				}
+			}
+			break;
+		case 4:
+			for(Command thisCommand : cameraList){
+				if(thisCommand.getCommandNum() == command){
+					return thisCommand.getName();
+				}
+			}
+			break;
+		case 5:
+			for(Command thisCommand : keyFrameList){
+				if(thisCommand.getCommandNum() == command){
+					return thisCommand.getName();
+				}
+			}
+			break;		
+		}	
+		return "No such command";		
+	}
+	
+	public static void checkInitialization(){
+		if(listsInitialized)
+			return;
+		
 		initGeneralCommands();
 		initMotorCommands();
 		initCameraCommands();
@@ -501,13 +542,10 @@ public class Command {
 			System.out.println("That is not a supported command type");
 			throw new UnsupportedOperationException();
 		}
-	}
-	
-	
+	}	
+		
 	private static void help(Type type){				
-		if(!Command.listsInitialized){
-			Command.initalizeCommands();
-		}
+		Command.checkInitialization();
 		List<Command> thisList = Command.getList(type);
 		System.out.println("\n******** " + type + " COMMAND LIST ********");
 		for(int i = 0; i < thisList.size(); i++){
@@ -517,9 +555,9 @@ public class Command {
 	
 	private static void find(Type type, String term){
 		term = term.toLowerCase();
-		if(!Command.listsInitialized){
-			Command.initalizeCommands();
-		}
+		
+		Command.checkInitialization();
+		
 		List<Command> thisList = Command.getList(type);
 		System.out.println("\n******** Matching commands ********");
 		for(int i = 0; i < thisList.size(); i++){
@@ -537,9 +575,7 @@ public class Command {
 	 * @return
 	 */
 	public static Command get(Type type, String name) throws UnsupportedOperationException{
-		if(!listsInitialized){
-			Command.initalizeCommands();
-		}
+		Command.checkInitialization();
 		List<Command> commandList = getList(type);
 		for(int i = 0; i < commandList.size(); i++){
 			Command thisCommand = commandList.get(i); 
@@ -558,9 +594,7 @@ public class Command {
 	 * @return
 	 */
 	public static Command get(Type type, int command){		
-		if(!listsInitialized){
-			Command.initalizeCommands();
-		}
+		Command.checkInitialization();
 		List<Command> commandList = getList(type);
 		for(int i = 0; i < commandList.size(); i++){
 			Command thisCommand = commandList.get(i); 

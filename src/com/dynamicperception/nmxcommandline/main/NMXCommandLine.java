@@ -1,6 +1,5 @@
 package com.dynamicperception.nmxcommandline.main;
 
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -50,7 +49,7 @@ public class NMXCommandLine {
 	}
 	
 	public static void parseCommand(String input){
-		parseCommand(getArgs(input));
+		parseCommand(getArgs(input, DELIMITER));
 	}
 
 	public static void parseCommand(List<String> args){		
@@ -67,6 +66,17 @@ public class NMXCommandLine {
 		else if(args.get(0).equals("run")){
 			try {
 				runCommandFile();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else if(args.get(0).equals("runCSV")){			
+			try {
+				if(args.size() > 1)
+					runCsvCommandFile(args.get(1));
+				else
+					runCsvCommandFile();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -192,15 +202,15 @@ public class NMXCommandLine {
 		}
 	}
 	
-	private static List<String> getArgs(String input){		
-		int argCount = input.length() - input.replace(DELIMITER, "").length() + 1;
+	private static List<String> getArgs(String input, String delimiter){		
+		int argCount = input.length() - input.replace(delimiter, "").length() + 1;
 		List<String> args = new ArrayList<String>();
 		for(int i = 0; i < argCount; i++){
 			if(i == argCount-1){
 				args.add(input);
 			}
 			else{
-				int index = input.indexOf(DELIMITER);
+				int index = input.indexOf(delimiter);
 				args.add(input.substring(0, index));
 				input = input.substring(index + 1, input.length());
 			}
@@ -219,7 +229,89 @@ public class NMXCommandLine {
 		for(int i = 0; i < commands.size(); i++){
 			parseCommand(commands.get(i));
 		}		
-	}	
+	}
+	
+	private static void runCsvCommandFile() throws IOException{
+		runCsvCommandFile("");
+	}
+	
+	private static void runCsvCommandFile(String which) throws IOException {
+		Path path = Paths.get("c:/commandLog"+which+".csv");
+		
+		// Get the list of commands
+		final Charset ENCODING = StandardCharsets.UTF_8;
+		List<String> commands = Files.readAllLines(path, ENCODING);
+		Console.pln("Commands found: " + commands.size());
+		long startTime = System.currentTimeMillis();
+		
+		boolean ignore = false;
+		long startIgnore = 0;
+		long stopIgnore = 0;
+		
+		
+		// Run them (skip command 0; that is the header)
+		for(int i = 1; i < commands.size(); i++){			
+			List<String> args = new ArrayList<String>();			
+			args = getArgs(commands.get(i), ",");
+			
+			// Ignore comment lines
+			if(args.get(0).indexOf("//") >= 0){
+				continue;
+			}
+			else if(args.get(10).indexOf("*/") >= 0){
+				ignore = false;				
+				// Adjust the start time so we're not stuck waiting for the next command
+				//startTime -= Long.parseLong(args.get(1)) - startIgnore;				
+				continue;
+			}
+			else if(args.get(0).indexOf("/*") >= 0){
+				ignore = true;				
+				startIgnore = Long.parseLong(args.get(1));
+				continue;
+			}
+			
+			if(ignore)
+				continue;
+				
+			
+			long time = Long.parseLong(args.get(1));
+			int _address = Integer.parseInt(args.get(2));
+			int _subAddr = Integer.parseInt(args.get(3));
+			int _command = Integer.parseInt(args.get(4));
+			int _length = Integer.parseInt(args.get(5));
+			int _data = Integer.parseInt(args.get(6));
+			boolean getResponse = Boolean.parseBoolean(args.get(7));
+			
+			// Replace position queries with firmware queries
+//			if(_command == 106){
+//				continue;
+//			}
+			
+			int printWait = 5000;
+			long lastPrint = System.currentTimeMillis();
+			while(System.currentTimeMillis() - startTime < time){				
+				// Wait till it's time to issue this command
+				if(System.currentTimeMillis() - lastPrint > printWait){
+					System.out.println("Time till next command: " + (time - (System.currentTimeMillis() - startTime)));
+					lastPrint = System.currentTimeMillis();
+				}
+			}			
+			try {
+				System.out.println("Command #" + args.get(0) + " -- Name: " + Command.getCommandName(_subAddr, _command) + " Data: " + _data);				
+				NMXComs.cmd(_address, _subAddr, _command, _length, _data, getResponse);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			// Check whether the controller has died
+			int failureThreshold = 10;
+			if(NMXComs.getEmptyResponseCount() > failureThreshold){
+				Console.pln("Lost communication with NMX after command #" + (i-failureThreshold-1));
+				System.exit(0);				
+			}
+		}		
+	}
 	
 	private static void quit(){
 		if(Serial.isPortOpen())
