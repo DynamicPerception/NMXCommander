@@ -34,8 +34,8 @@ public class NMXComs {
 			
 	// Response delay options
 	protected static class ResponseTiming{		
-		public final static int DEFAULT = 60;
-		public final static int NO_RESPONSE = 25;
+		public final static int DEFAULT = 80;
+		public final static int NO_RESPONSE = 30;
 		public final static int EEPROM = 300;	
 		public final static int LONG_WAIT = 1500;
 	}

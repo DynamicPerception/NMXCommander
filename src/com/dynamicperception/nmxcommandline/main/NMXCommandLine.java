@@ -236,7 +236,12 @@ public class NMXCommandLine {
 	}
 	
 	private static void runCsvCommandFile(String which) throws IOException {
-		Path path = Paths.get("c:/commandLog"+which+".csv");
+		Path path;
+		
+		if(which.equals(""))
+			path = Paths.get("c:/commandLog.csv");
+		else
+			path = Paths.get("c:/commandLog_"+which+".csv");
 		
 		// Get the list of commands
 		final Charset ENCODING = StandardCharsets.UTF_8;
@@ -261,7 +266,7 @@ public class NMXCommandLine {
 			else if(args.get(10).indexOf("*/") >= 0){
 				ignore = false;				
 				// Adjust the start time so we're not stuck waiting for the next command
-				//startTime -= Long.parseLong(args.get(1)) - startIgnore;				
+				startTime -= Long.parseLong(args.get(1)) - startIgnore;				
 				continue;
 			}
 			else if(args.get(0).indexOf("/*") >= 0){
