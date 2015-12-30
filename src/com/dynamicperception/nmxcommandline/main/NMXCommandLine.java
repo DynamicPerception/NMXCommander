@@ -57,7 +57,7 @@ public class NMXCommandLine {
 		// Request to quit
 		if(args.get(0).equals("exit")){
 			quit();
-		}
+		}		
 		// Skip if it's a comment line
 		else if(args.get(0).indexOf("//") != -1){
 			return;
@@ -70,6 +70,7 @@ public class NMXCommandLine {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			return;
 		}
 		else if(args.get(0).equals("runCSV")){			
 			try {
@@ -81,6 +82,12 @@ public class NMXCommandLine {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			return;
+		}
+		// Help request
+		else if(args.get(0).toLowerCase().equals("help")){
+			Command.help(Command.getType(args.get(1)));
+			return;
 		}
 		// Request to repeat command
 		else if(args.get(0).equals("r")){						
@@ -97,15 +104,10 @@ public class NMXCommandLine {
 		else if(args.get(0).equals("find")){
 			findCommand(args);
 			return;			
-		}
-		// Help list
-		else if(args.size()== 1){
-			getHelp(args);
-			return;
-		}
+		}		
 		// Normal Command
 		else{
-			System.out.println("Last command loaded time elapsed: " + (System.nanoTime() - lastTime));
+			//System.out.println("Last command loaded time elapsed: " + (System.nanoTime() - lastTime));
 			runCommand(args);
 			lastTime = System.nanoTime();
 		}
@@ -113,42 +115,26 @@ public class NMXCommandLine {
 	
 	private static void runCommand(List<String> args){
 		
-		String typeStr = args.get(0);
 		String cmdStr = "";
+				
+		cmdStr = args.get(0);				
 		
-		if(args.size() > 1){
-			cmdStr = args.get(1);
-		}
-		
-		Command.Type type = null;
-		if(typeStr.equals("g")){
-			type = Type.GENERAL;
-		}
-		else if(typeStr.equals("m")){
-			type = Type.MOTOR;
-		}
-		else if(typeStr.equals("c")){
-			type = Type.CAMERA;
-		}
-		else if(typeStr.equals("k")){
-			type = Type.KEYFRAME;
-		}
 		try{			
-			Command thisCommand = Command.get(type, cmdStr);
+			Command thisCommand = Command.get(cmdStr);
 						
-			if(args.size() == 3 && args.get(2).equals("-h")){
-				thisCommand.printInfo();			
+			if(args.size() == 2 && args.get(1).equals("-h")){
+				thisCommand.help();		
 				return;
 			}
 			
-			if(args.size() == 2){				
-				thisCommand.execute();
+			if(args.size() == 1){				
+				thisCommand.executeThis();
+			}
+			else if(args.size() == 2){				
+				thisCommand.executeThis(args.get(1));
 			}
 			else if(args.size() == 3){				
-				thisCommand.execute(args.get(2));
-			}
-			else if(args.size() == 4){				
-				thisCommand.execute(args.get(2), args.get(3));
+				thisCommand.executeThis(args.get(1), args.get(2));
 			}			
 		}catch(UnsupportedOperationException e){
 			Console.pln("Not a valid command");
@@ -157,63 +143,21 @@ public class NMXCommandLine {
 	}
 	
 	private static void findCommand(List<String> args){
-		if(args.size() < 3){
+		if(args.size() < 2){
 			Console.pln("Invalid search syntax");
 			return;
-		}		
+		}
 		
-		String typeStr = args.get(1);
-		String term = args.get(2);
-		if(typeStr.equals("g")){
-			Command.Names.General.find(term);
-			return;
-		}
-		else if(typeStr.equals("m")){
-			Command.Names.Motor.find(term);
-			return;
-		}
-		else if(typeStr.equals("c")){
-			return;
-		}
-		else if(typeStr.equals("k")){
-			return;
-		}
-		else{
-			Console.pln("Invalid type");
-			return;
-		}
-	}
-	
-	private static void getHelp(List<String> args){
-		String typeStr = args.get(0);
-		if(typeStr.equals("g")){
-			Command.Names.General.help();
-			return;
-		}
-		else if(typeStr.equals("m")){
-			Command.Names.Motor.help();;
-			return;
-		}
-		else if(typeStr.equals("c")){
-			return;
-		}
-		else if(typeStr.equals("k")){
-			return;
-		}
+		String term = args.get(1);
+		Command.find(term);		
 	}
 	
 	private static List<String> getArgs(String input, String delimiter){		
-		int argCount = input.length() - input.replace(delimiter, "").length() + 1;
+		String[] argArray = input.split(delimiter);
+		
 		List<String> args = new ArrayList<String>();
-		for(int i = 0; i < argCount; i++){
-			if(i == argCount-1){
-				args.add(input);
-			}
-			else{
-				int index = input.indexOf(delimiter);
-				args.add(input.substring(0, index));
-				input = input.substring(index + 1, input.length());
-			}
+		for(String arg : argArray){
+			args.add(arg);
 		}
 		return args;		
 	}
@@ -250,9 +194,7 @@ public class NMXCommandLine {
 		long startTime = System.currentTimeMillis();
 		
 		boolean ignore = false;
-		long startIgnore = 0;
-		long stopIgnore = 0;
-		
+		long startIgnore = 0;		
 		
 		// Run them (skip command 0; that is the header)
 		for(int i = 1; i < commands.size(); i++){			
@@ -286,11 +228,6 @@ public class NMXCommandLine {
 			int _length = Integer.parseInt(args.get(5));
 			int _data = Integer.parseInt(args.get(6));
 			boolean getResponse = Boolean.parseBoolean(args.get(7));
-			
-			// Replace position queries with firmware queries
-//			if(_command == 106){
-//				continue;
-//			}
 			
 			int printWait = 5000;
 			long lastPrint = System.currentTimeMillis();
