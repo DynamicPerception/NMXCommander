@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.dynamicperception.nmxcommandline.coms.Serial;
@@ -86,6 +87,11 @@ public class NMXCommandLine {
 		}
 		// Help request
 		else if(args.get(0).toLowerCase().equals("help")){
+			if(args.size() < 2){
+				Console.pln("Help syntax -- \"help <command type>\"");
+				Console.pln("Example -> \"help c\" prints the list of valid camera commands");
+				return;
+			}				
 			Command.help(Command.getType(args.get(1)));
 			return;
 		}
@@ -102,7 +108,15 @@ public class NMXCommandLine {
 		}
 		// Find command name
 		else if(args.get(0).equals("find")){
-			findCommand(args);
+			if(args.size() < 2){
+				Console.pln("Find syntax -- \"find <command type>.<search string>\"");
+				Console.pln("Example -> \"find m.speed\" prints the following:");
+				List <String> exampleArgs = Arrays.asList("find", "m.speed");				
+				findCommand(exampleArgs);				
+			}
+			else{
+				findCommand(args);
+			}
 			return;			
 		}		
 		// Normal Command
