@@ -2,7 +2,6 @@ package com.dynamicperception.nmxcommandline.models;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 import com.dynamicperception.nmxcommandline.helpers.Consts;
 
 public class Command {
@@ -60,28 +59,28 @@ public class Command {
 			// Commands
 			public static final String START_PROGRAM						= "g.start";
 			public static final String PAUSE_PROGRAM						= "g.pause";			
-			public static final String STOP_PROGRAM			 			= "g.stop	";
+			public static final String STOP_PROGRAM			 				= "g.stop	";
 			public static final String TOGGLE_LED	 						= "g.toggleLed";
 			public static final String SET_TIMING_MASTER 					= "g.setTimingMaster";
 			public static final String SET_NAME 							= "g.setName";			
-			public static final String SET_ADDRESS 						= "g.setAddress";
-			public static final String SET_COMMON_LINE 	 				= "g.setCommonLine";
+			public static final String SET_ADDRESS 							= "g.setAddress";
+			public static final String SET_COMMON_LINE 	 					= "g.setCommonLine";
 			public static final String SEND_ALL_MOTORS_HOME 				= "g.sendAllHome";
 			public static final String SET_MAX_STEP_RATE					= "g.setMaxStepRate";
 			
 			public static final String SET_INPUT_EDGE						= "g.setInputEdge";
 			public static final String SET_ALT_IO_MODE						= "g.setAltIOMode";
-			public static final String SET_WATCHDOG						= "g.setWatchdog";
+			public static final String SET_WATCHDOG							= "g.setWatchdog";
 			
 			public static final String SET_ALT_OUT_B4_SHOT_DELAY_TIME 		= "g.setAltOutBeforeShotDelayTime";
 			public static final String SET_ALT_OUT_AFTER_SHOT_DELAY_TIME 	= "g.setAltOutAfterShotDelayTime";
 			public static final String SET_ALT_OUT_B4_SHOT_TIME 			= "g.setAltOutBeforeShotTime";
-			public static final String SET_ALT_OUT_AFTER_SHOT_TIME 		= "g.setAltOutAfterShotTime";			
+			public static final String SET_ALT_OUT_AFTER_SHOT_TIME 			= "g.setAltOutAfterShotTime";			
 			public static final String SET_ALT_OUT_TRIGGER_LEVEL			= "g.setAltOutTriggerLevel";
 			
-			public static final String SET_MAX_PROGRAM_TIME				= "g.setMaxProgramTime";
-			public static final String SET_PROGRAM_MODE					= "g.setProgramMode"; 
-			public static final String SET_JOYSTICK						= "g.setJoystick";
+			public static final String SET_MAX_PROGRAM_TIME					= "g.setMaxProgramTime";
+			public static final String SET_PROGRAM_MODE						= "g.setProgramMode"; 
+			public static final String SET_JOYSTICK							= "g.setJoystick";
 			public static final String SET_PINGPONG 						= "g.setPingpong";			
 			public static final String SEND_ALL_MOTORS_START				= "g.sendAllStart";
 			public static final String SET_START_HERE						= "g.setStartHere";
@@ -94,36 +93,36 @@ public class Command {
 			public static final String SET_DEBUG							= "g.setDebug";
 						
 			// Queries		
-			public static final String GET_FIRMWARE						= "g.getFirmware";
+			public static final String GET_FIRMWARE							= "g.getFirmware";
 			public static final String GET_RUN_STATUS 						= "g.getRunStatus";
 			public static final String GET_RUN_TIME 						= "g.getRunTime";
 			public static final String IS_EXPOSING							= "g.isExposing";
 			public static final String IS_TIMING_MASTER 					= "g.isTimingMaster";
-			public static final String GET_NAME							= "g.getName";
+			public static final String GET_NAME								= "g.getName";
 			public static final String GET_MAX_STEP_RATE 					= "g.getMaxStepRate";
-			public static final String GET_VOLTAGE 						= "g.getVoltage";
-			public static final String GET_CURRENT 						= "g.getCurrent";
+			public static final String GET_VOLTAGE 							= "g.getVoltage";
+			public static final String GET_CURRENT 							= "g.getCurrent";
 			public static final String GET_ALT_INPUT_EDGE					= "g.getAltInputEdge";
 			public static final String GET_ALT_IO_MODE						= "g.getAltIOMode";			
 			public static final String GET_LIMIT_SWITCH_STATE				= "g.getLimitSwitchState";
 			public static final String GET_ALT_OUT_B4_SHOT_DELAY_TIME 		= "g.getAltOutBeforeShotDelayTime";
 			public static final String GET_ALT_OUT_AFTER_SHOT_DELAY_TIME 	= "g.getAltOutAfterShotDelayTime";
 			public static final String GET_ALT_OUT_B4_SHOT_TIME 			= "g.getAltOutBeforeShotTime";
-			public static final String GET_ALT_OUT_AFTER_SHOT_TIME 		= "g.getAltOutAfterShotTime";			
+			public static final String GET_ALT_OUT_AFTER_SHOT_TIME 			= "g.getAltOutAfterShotTime";			
 			public static final String GET_ALT_OUT_TRIGGER_LEVEL			= "g.getAltOutTriggerLevel";
 			public static final String GET_PROGRAM_DELAY					= "g.getProgramDelay";
 			public static final String GET_PROGRAM_MODE 					= "g.getProgramMode";
-			public static final String GET_POWER_CYCLED					= "g.getPowerCyled";	
-			public static final String GET_JOYSTICK						= "g.getJoystick";	
-			public static final String GET_PINGPONG						= "g.getPingpong";
-			public static final String GET_WATCHDOG						= "g.getWatchdog";
-			public static final String GET_PCT_COMP						= "g.getPctComplete";
+			public static final String GET_POWER_CYCLED						= "g.getPowerCyled";	
+			public static final String GET_JOYSTICK							= "g.getJoystick";	
+			public static final String GET_PINGPONG							= "g.getPingpong";
+			public static final String GET_WATCHDOG							= "g.getWatchdog";
+			public static final String GET_PCT_COMP							= "g.getPctComplete";
 			public static final String GET_MOT_ATTCH						= "g.getMotorAttach";
 			public static final String GET_TOTAL_RUN_TIME					= "g.getTotalRunTime";
 			public static final String IS_PROGRAM_COMPLETE					= "g.isProgramComplete";
-			public static final String GET_FPS 							= "g.getFPS";			
-			public static final String GET_MOTOR_RUNNING_STATES			= "g.getMotorRunningStates";
-			public static final String IS_PROGRAM_VALID					= "g.isProgramValid";
+			public static final String GET_FPS 								= "g.getFPS";			
+			public static final String GET_MOTOR_RUNNING_STATES				= "g.getMotorRunningStates";
+			public static final String IS_PROGRAM_VALID						= "g.isProgramValid";
 			public static final String GET_MOTOR_SLEEP_STATES				= "g.getMotorSleepStates";
 			public static final String IS_GRAFFIK							= "g.isGraffik";	
 			
@@ -147,26 +146,26 @@ public class Command {
 			public static final String SET_START_HERE	= "m.setStartHere";
 			public static final String SET_STOP_HERE 	= "m.setStopHere";
 			public static final String SET_START		= "m.setStart";
-			public static final String SET_STOP		= "m.setStop";			
+			public static final String SET_STOP			= "m.setStop";			
 			public static final String SET_EASING		= "m.setEasing";
 			public static final String SET_LEAD_IN		= "m.setLeadIn";
 			public static final String SET_TRAVEL		= "m.setTravel";
 			public static final String SET_PROG_ACCEL	= "m.setProgramAccel";
 			public static final String SET_PROG_DECEL	= "m.setProgramDecel";
-			public static final String SET_LEAD_OUT	= "m.setLeadOut";
+			public static final String SET_LEAD_OUT		= "m.setLeadOut";
 			public static final String AUTO_SET_MS		= "m.autoSetMS";
 			
-			public static final String SET_POS 		= "m.setPos";
+			public static final String SET_POS 			= "m.setPos";
 			
 			public static final String SEND_HOME 		= "m.sendHome";
 			public static final String SEND_END 		= "m.sendEnd";
 			public static final String SEND_START 		= "m.sendStart";
 			public static final String SEND_STOP		= "m.sendStop";
-			public static final String SEND_TO 		= "m.sendTo";
+			public static final String SEND_TO 			= "m.sendTo";
 			
 			public static final String STOP_MOTOR 		= "m.stop";
 			public static final String SET_MAX_SPEED 	= "m.setMaxSpeed";
-			public static final String SET_DIR 		= "m.setDir";
+			public static final String SET_DIR 			= "m.setDir";
 			public static final String SET_SPEED		= "m.setSpeed";
 			public static final String SET_ACCEL		= "m.setAccel";						
 			
@@ -175,21 +174,21 @@ public class Command {
 			public static final String GET_ENABLE 		= "m.isEnabled";			
 			public static final String GET_BACKLASH 	= "m.getBacklash";
 			public static final String GET_MS 			= "m.getMS";
-			public static final String GET_END 		= "m.getEnd";
-			public static final String GET_POS 		= "m.getPos";			
+			public static final String GET_END 			= "m.getEnd";
+			public static final String GET_POS 			= "m.getPos";			
 			public static final String GET_SPEED 		= "m.getSpeed";
 			public static final String GET_ACCEL 		= "m.getAccel";
 			public static final String GET_START 		= "m.getStart";
 			public static final String GET_STOP 		= "m.getStop";
 			public static final String GET_TRAVEL		= "m.getTravel";
 			public static final String GET_SLEEP 		= "m.getSleep";
-			public static final String GET_DIR 		= "m.getDir";
+			public static final String GET_DIR 			= "m.getDir";
 			public static final String GET_MAX_STEP_RATE = "m.getMaxStepRate";		
 			public static final String GET_EASING		= "m.getEasing";
 			public static final String GET_LEAD_IN		= "m.getLeadIn";
 			public static final String GET_PROG_ACCEL	= "m.getProgramAccel";
 			public static final String GET_PROG_DECEL	= "m.getProgramDecel";
-			public static final String GET_LEAD_OUT	= "m.getLeadOut";
+			public static final String GET_LEAD_OUT		= "m.getLeadOut";
 			public static final String IS_SPEED_VALID	= "m.isSpeedValid";
 
 		}
@@ -200,12 +199,12 @@ public class Command {
 			//Commands
 			public static final String SET_ENABLE 				= "c.setEnable";			
 			public static final String EXPOSE_NOW 				= "c.expose";
-			public static final String SET_TRIGGER 			= "c.setTrigger";
+			public static final String SET_TRIGGER 				= "c.setTrigger";
 			public static final String SET_FOCUS 				= "c.setFocus";
 			public static final String SET_MAX_SHOTS			= "c.setMaxShots";
 			public static final String SET_DELAY	 			= "c.setDelay";
 			public static final String SET_FOCUS_WITH_SHUTTER	= "c.setFocusWithShutter";
-			public static final String SET_INTERVAL			= "c.setInterval";		
+			public static final String SET_INTERVAL				= "c.setInterval";		
 			public static final String SET_MUP		 			= "c.setMUP";
 			public static final String SET_TEST_MODE 			= "c.setTestMode";
 			public static final String SET_KEEPALIVE			= "c.setKeepAlive";
@@ -218,8 +217,8 @@ public class Command {
 			public static final String GET_MAX_SHOTS 			= "c.getMaxShots";
 			public static final String GET_DELAY	 			= "c.getDelay";	
 			public static final String GET_FOCUS_WITH_SHUTTER	= "c.getFocusWithShutter";
-			public static final String GET_MUP 				= "c.getMUP";
-			public static final String GET_INTERVAL			= "c.getInterval";			
+			public static final String GET_MUP 					= "c.getMUP";
+			public static final String GET_INTERVAL				= "c.getInterval";			
 			public static final String GET_SHOTS				= "c.getShots";	
 			public static final String GET_TEST_MODE			= "c.getTestMode";
 			public static final String GET_KEEPALIVE			= "c.getKeepAlive";
@@ -386,14 +385,29 @@ public class Command {
 		if(listsInitialized)
 			return;
 		
-		initGeneralCommands();
-		initMotorCommands();
-		initCameraCommands();
-		initKeyFrameCommands();
+		initCommands();
 		listsInitialized = true;
 	}
 	
-	private static void initGeneralCommands(){
+private static void initCommands(){
+		
+		//******** Help Commands ********//
+		class DebugHelp implements HelpCommand{
+			@Override
+			public void helpCommand() {				
+				System.out.println("\nSyntax: g.setDebug <DEBUG_CODE>");
+				System.out.println("Valid codes:");
+				System.out.println("1 - Raw command trace");			
+				System.out.println("2 - Motor steps");
+				System.out.println("4 - General motor info");
+				System.out.println("8 - Serial command detail (descriptive output)");
+				System.out.println("16 - Function detail");
+				System.out.println("32 - Command success / failure message");				
+			}			
+		}
+		
+		//******** General Commands ********//
+		
 		// Create the general commands		
 		generalList.add(new Command(Command.Type.GENERAL, 2, Names.General.START_PROGRAM));
 		generalList.add(new Command(Command.Type.GENERAL, 3, Names.General.PAUSE_PROGRAM));
@@ -461,25 +475,13 @@ public class Command {
 		generalList.add(new Command(Command.Type.GENERAL, 130, Integer.class, Names.General.GET_MOTOR_SLEEP_STATES));
 		generalList.add(new Command(Command.Type.GENERAL, 150, Boolean.class, Names.General.IS_GRAFFIK));
 		
-		Command setDebug = new Command(Command.Type.GENERAL, 254, Names.General.SET_DEBUG, Byte.class);
-		class DebugHelp implements HelpCommand{
-			@Override
-			public void helpCommand() {				
-				System.out.println("\nSyntax: g.setDebug <DEBUG_CODE>");
-				System.out.println("Valid codes:");
-				System.out.println("1 - Raw command trace");			
-				System.out.println("2 - Motor steps");
-				System.out.println("4 - General motor info");
-				System.out.println("8 - Serial command detail (descriptive output)");
-				System.out.println("16 - Function detail");
-				System.out.println("32 - Command success / failure message");				
-			}			
-		}
+		Command setDebug = new Command(Command.Type.GENERAL, 254, Names.General.SET_DEBUG, Byte.class);		
 		setDebug.setHelpCommand(new DebugHelp());
 		generalList.add(setDebug);
-	}
 	
-	private static void initMotorCommands(){
+		
+		//******** Motor Commands ********//
+		
 		// Create the general commands		
 		motorList.add(new Command(Command.Type.MOTOR, 2, Names.Motor.SET_SLEEP, Byte.class));
 		motorList.add(new Command(Command.Type.MOTOR, 3, Names.Motor.SET_ENABLE, Byte.class));
@@ -509,8 +511,9 @@ public class Command {
 		motorList.add(new Command(Command.Type.MOTOR, 27, Names.Motor.RESET_LIMITS));
 		motorList.add(new Command(Command.Type.MOTOR, 28, Integer.class, Names.Motor.AUTO_SET_MS));
 		motorList.add(new Command(Command.Type.MOTOR, 29, Names.Motor.SET_START_HERE));
-		motorList.add(new Command(Command.Type.MOTOR, 30, Names.Motor.SET_STOP_HERE, Byte.class));
-		motorList.add(new Command(Command.Type.MOTOR, 31, Names.Motor.SEND_TO, Long.class));		
+		motorList.add(new Command(Command.Type.MOTOR, 30, Names.Motor.SET_STOP_HERE, Byte.class));	
+		motorList.add(new Command(Command.Type.MOTOR, 31, Names.Motor.SEND_TO, Long.class));
+				
 		
 		// Queries
 		motorList.add(new Command(Command.Type.MOTOR, 100, Boolean.class, Names.Motor.GET_ENABLE));
@@ -518,22 +521,8 @@ public class Command {
 		motorList.add(new Command(Command.Type.MOTOR, 102, Integer.class, Names.Motor.GET_MS));
 		motorList.add(new Command(Command.Type.MOTOR, 103, Integer.class, Names.Motor.GET_DIR));
 		motorList.add(new Command(Command.Type.MOTOR, 104, Integer.class, Names.Motor.GET_MAX_STEP_RATE));
-		motorList.add(new Command(Command.Type.MOTOR, 105, Integer.class, Names.Motor.GET_END));
-		class GetPosAux implements AuxCommand{
-			@Override
-			public int preCommand() {
-				// No pre-command
-				return 0;
-			}
-
-			@Override
-			public int postCommand(int subAddr, int returnVal) {
-				int motor = subAddr - 1;
-				// Save non-error values to the motor model				
-				return 0;
-			}			
-		}
-		motorList.add(new Command(Command.Type.MOTOR, 106, Integer.class, Names.Motor.GET_POS, new GetPosAux()));
+		motorList.add(new Command(Command.Type.MOTOR, 105, Integer.class, Names.Motor.GET_END));	
+		motorList.add(new Command(Command.Type.MOTOR, 106, Integer.class, Names.Motor.GET_POS));		
 		motorList.add(new Command(Command.Type.MOTOR, 107, Boolean.class, Names.Motor.IS_RUNNING));
 		motorList.add(new Command(Command.Type.MOTOR, 108, Float.class, Names.Motor.GET_SPEED));
 		motorList.add(new Command(Command.Type.MOTOR, 109, Float.class, Names.Motor.GET_ACCEL));
@@ -547,19 +536,20 @@ public class Command {
 		motorList.add(new Command(Command.Type.MOTOR, 117, Boolean.class, Names.Motor.GET_SLEEP));
 		motorList.add(new Command(Command.Type.MOTOR, 118, Boolean.class, Names.Motor.IS_SPEED_VALID));
 		motorList.add(new Command(Command.Type.MOTOR, 119, Integer.class, Names.Motor.GET_LEAD_OUT));
-	}
 	
-	private static void initCameraCommands(){
+		
+		//******** Camera Commands ********//
+		
 		// Commands		
 		cameraList.add(new Command(Command.Type.CAMERA, 2, Names.Camera.SET_ENABLE, Integer.class));
 		cameraList.add(new Command(Command.Type.CAMERA, 3, Names.Camera.EXPOSE_NOW, Integer.class));
-		cameraList.add(new Command(Command.Type.CAMERA, 4, Names.Camera.SET_TRIGGER, Integer.class));
+		cameraList.add(new Command(Command.Type.CAMERA, 4, Names.Camera.SET_TRIGGER, Long.class));
 		cameraList.add(new Command(Command.Type.CAMERA, 5, Names.Camera.SET_FOCUS, Integer.class));
 		cameraList.add(new Command(Command.Type.CAMERA, 6, Names.Camera.SET_MAX_SHOTS, Integer.class));
 		cameraList.add(new Command(Command.Type.CAMERA, 7, Names.Camera.SET_DELAY, Integer.class));
 		cameraList.add(new Command(Command.Type.CAMERA, 8, Names.Camera.SET_FOCUS_WITH_SHUTTER));
 		cameraList.add(new Command(Command.Type.CAMERA, 9, Names.Camera.SET_MUP, Integer.class));
-		cameraList.add(new Command(Command.Type.CAMERA, 10, Names.Camera.SET_INTERVAL, Integer.class));
+		cameraList.add(new Command(Command.Type.CAMERA, 10, Names.Camera.SET_INTERVAL, Long.class));
 		cameraList.add(new Command(Command.Type.CAMERA, 11, Names.Camera.SET_TEST_MODE, Integer.class));
 		cameraList.add(new Command(Command.Type.CAMERA, 12, Names.Camera.SET_KEEPALIVE, Integer.class));
 		
@@ -576,14 +566,15 @@ public class Command {
 		cameraList.add(new Command(Command.Type.CAMERA, 109, Integer.class, Names.Camera.GET_SHOTS));
 		cameraList.add(new Command(Command.Type.CAMERA, 110, Integer.class, Names.Camera.GET_TEST_MODE));
 		cameraList.add(new Command(Command.Type.CAMERA, 111, Integer.class, Names.Camera.GET_KEEPALIVE));
-	}
 	
-	private static void initKeyFrameCommands(){
+		
+		//******** Key Frame Commands ********//
+		
 		// Commands		
-		keyFrameList.add(new Command(Command.Type.KEYFRAME, 10, Integer.class, Names.KeyFrame.SET_AXIS, Integer.class));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 10, Integer.class, Names.KeyFrame.SET_AXIS, Integer.class));		
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 11, Integer.class, Names.KeyFrame.SET_COUNT, Integer.class));
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 12, Float.class, Names.KeyFrame.SET_ABSCISSA, Float.class));
-		keyFrameList.add(new Command(Command.Type.KEYFRAME, 13, Float.class, Names.KeyFrame.SET_POS, Float.class));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 13, Float.class, Names.KeyFrame.SET_POS, Float.class));		
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 14, Float.class, Names.KeyFrame.SET_VEL, Float.class));
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 15, Integer.class, Names.KeyFrame.SET_UPDATE_RATE, Integer.class));
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 16, Names.KeyFrame.END_TRANSMISSION));
@@ -596,7 +587,7 @@ public class Command {
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 99, Names.KeyFrame.PRINT_INFO));
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 100, Integer.class, Names.KeyFrame.GET_COUNT));
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 101, Integer.class, Names.KeyFrame.GET_UPDATE_RATE));
-		keyFrameList.add(new Command(Command.Type.KEYFRAME, 102, Float.class, Names.KeyFrame.GET_POS_AT, Float.class));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 102, Float.class, Names.KeyFrame.GET_POS_AT, Float.class));		
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 103, Float.class, Names.KeyFrame.GET_VEL_AT, Float.class));
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 104, Float.class, Names.KeyFrame.GET_ACCEL_AT, Float.class));
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 105, Names.KeyFrame.IS_VEL_VALID));
@@ -637,7 +628,7 @@ public class Command {
 		if(name.substring(0,1).equals("g")){
 			return Type.GENERAL;
 		}
-		else if(name.substring(0,1).equals("m")){
+		else if(name.substring(0,1).equals("m")){			
 			return Type.MOTOR;
 		}
 		else if(name.substring(0,1).equals("c")){
@@ -651,7 +642,7 @@ public class Command {
 		}
 	}
 		
-	public static void help(Type type){				
+	public static void printList(Type type){				
 		if(type == Type.NOT_A_TYPE){
 			System.out.println("Not a valid command type");
 			return;
