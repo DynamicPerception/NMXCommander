@@ -32,12 +32,18 @@ public class NMXCommandLine {
 	
 		// If arguments ares supplied upon execution, run only those, then quit
 		if(args.length > 0){
+			
+			if(args[0].toLowerCase().equals("help")){
+				printTerminalHelp();
+				quit();
+			}
+			
 			try{
 				serial.openPort(args[0]);
 			}catch(RuntimeException e){
 				Console.pln("Invalid port! Either you picked the wrong number or you have the wrong syntax.\n"
 						+ "A full one-time execution should look something like this: "
-						+ "\"java -jar NMXCmd.jar COM32 m.sendTo 0 15000\"");
+						+ "\"NMXCmd.jar COM32 m.sendTo 0 15000\"");
 				quit();
 			}
 			
@@ -63,22 +69,34 @@ public class NMXCommandLine {
 	}
 	
 	/**
+	 * Prints help for starting application from the terminal
+	 */
+	private static void printTerminalHelp(){
+		Console.pln("\nIn order to enter the interactive command line tool, run this JAR file without arguments.\n"
+				+ "Alternatively, you may run it with the following arguments to execute a single NMX command and then\n"
+				+ "immediately disconnect from the controller and close this application:\n\n"
+				+ "\"NMXCommander.jar <PORT NAME> <COMMAND TYPE>.<COMMAND NAME> <DATA or MOTOR # (if needed)> <MOTOR DATA (if needed)>\"\n\n"
+				+ "If you're not familiar with the command types, names, data, etc., open the application in interactive\n"
+				+ "mode first and read the extended help there.");
+	}
+	
+	/**
 	 * Prints general application help
 	 */
 	private static void printHelp(){
 		Console.pln("\n\n******** NMX Commander " + version + " Overview ********\n\n"
 				+ "This command line tool allows you to manually send single instuctions to the NMX controller.\n"
 				+ "This is done by giving input with the following syntax:\n\n"
-				+ "Non-motor commands -- \"<command type>.<command name> <data (if required)>\"\n"
-				+ "Motor commands -- \"m.<command name> <motor #> <data (if required)>\"\n\n"
+				+ "Non-motor commands -- \"<COMMAND TYPE>.<COMMAND NAME> <DATA (if required)>\"\n"
+				+ "Motor commands -- \"m.<COMMAND NAME> <MOTOR #> <DATA (if required)>\"\n\n"
 				+ "Non-motor command types include \"g\" (general), \"c\" (camera), and \"k\" (key frame)\n"
 				+ "When specifying the motor number for motor commands, counting starts at 0 (i.e. valid motor #s are 0, 1, 2)\n\n"
 				+ "******** Other Useful Commands ********\n\n"
 				+ "* \"help\" -- prints this information again\n\n"
-				+ "* \"<command type>.<command name>\" -h -- prints command-specific help\n\n"
-				+ "* \"list <command type>\" -- lists all commands of that type\n\n"
-				+ "* \"find <command type>.<search term>\" -- returns all commands of that type containing the search term\n\n"
-				+ "* \"runMacro <path>\" -- runs a command macro list from a text file. Type \"runMacro\" without arguments\n"
+				+ "* \"<COMMAND TYPE>.<COMMAND NAME>\" -h -- prints command-specific help\n\n"
+				+ "* \"list <COMMAND TYPE>\" -- lists all commands of that type\n\n"
+				+ "* \"find <COMMAND TYPE>.<SEARCH TERM>\" -- returns all commands of that type containing the search term\n\n"
+				+ "* \"runMacro <PATH>\" -- runs a command macro list from a text file. Type \"runMacro\" without arguments\n"
 				+ "for macro file syntax\n\n"
 				+ "* \"exit\" -- closes the serial port and exits the application\n\n"
 				+ "******** Some Important Tips ********\n\n"
@@ -93,7 +111,7 @@ public class NMXCommandLine {
 				+ "BE CAREFUL ABOUT THIS! If you accidentally send your rig two or four times as far as you intended, you can break\n"
 				+ "your valueable equipment!\n\n"
 				+ "* If you try to send a motor to a position and it either does not move or does not go all the way to where you sent it,\n"
-				+ "try running the command \"m.resetLimits <motor #>\" to clear any end limits that may be restricting movement.");				
+				+ "try running the command \"m.resetLimits <MOTOR #>\" to clear any end limits that may be restricting movement.");				
 	}
 	
 	/**
@@ -158,10 +176,10 @@ public class NMXCommandLine {
 		else if(args.get(0).equals("runMacro")){
 			try {
 				if(args.size() == 1){
-					Console.pln("\nrunMacro syntax -- \"runMacro <macro path>\"");
+					Console.pln("\nrunMacro syntax -- \"runMacro <PATH>\"");
 					Console.pln("Example -> \"runMacro c:\\NMXmacro.txt\"\n");
 					Console.pln("The text file should have one command on each line with the following syntax:\n\n"
-							+ "\"<delay in milliseconds after last command> <command type>.<command name> <data OR motor #> <motor cmd data>\"\n\n"
+							+ "\"<DELAY TIME> <COMMAND TYPE>.<COMMAND NAME> <DATA or MOTOR # (if needed)> <MOTOR DATA (if needed)>\"\n\n"
 							+ "The following example enables the camera, sets the focus time to 600ms, trigger time to 100ms, sets home\n"
 							+ "for each the motors (e.g. sets current position to 0), immediately takes an exposure, commands the motors to\n"
 							+ "a new position, waits 5000ms, takes another exposure, waits 1000ms, commands the motors back to their original\n"
@@ -210,7 +228,7 @@ public class NMXCommandLine {
 		// Help request
 		else if(args.get(0).toLowerCase().equals("list")){
 			if(args.size() < 2){
-				Console.pln("List syntax -- \"list <command type>\"");
+				Console.pln("List syntax -- \"list <COMMAND TYPE>\"");
 				Console.pln("Example -> \"list c\" prints the list of valid camera commands");
 				return;
 			}				
@@ -231,7 +249,7 @@ public class NMXCommandLine {
 		// Find command name
 		else if(args.get(0).equals("find")){
 			if(args.size() < 2){
-				Console.pln("Find syntax -- \"find <command type>.<search string>\"");
+				Console.pln("Find syntax -- \"find <COMMAND TYPE>.<SEARCH TERM>\"");
 				Console.pln("Example -> \"find m.speed\" prints the following:");
 				List <String> exampleArgs = Arrays.asList("find", "m.speed");				
 				findCommand(exampleArgs);				
@@ -252,9 +270,9 @@ public class NMXCommandLine {
 	/**
 	 * Executes a specified command 
 	 * @param args Command arguments as a list of String arguments with the following syntax:
-	 * <br>[0] == "&lt<b>command type</b>&gt.&lt<b>command name</b>&gt"
-	 * <br>[1] == "<b>-h</b>"  for help OR "&lt<b>command data</b>&gt" OR "&lt<b>motor number</b>&gt (optional)
-	 * <br>[2] == "&lt<b>command data</b>&gt"(if [1] == &lt<b>motor number</b>&gt (optional))  
+	 * <br>[0] == "&ltCOMMAND TYPE&gt.&ltCOMMAND NAME&gt"
+	 * <br>[1] == "-h"  for help OR "&ltCOMMAND DATA&gt" or "&ltMOTOR NUMBER&gt (optional)
+	 * <br>[2] == "&ltCOMMAND DATA&gt"(if [1] == &ltMOTOR NUMBER&gt (optional))  
 	 */
 	private static void runCommand(List<String> args){
 		
@@ -288,7 +306,7 @@ public class NMXCommandLine {
 	/**
 	 * Accepts a list of String arguments and finds commands that contain the search term 
 	 * @param args A list of String arguments. The search parameter must be
-	 * in array location 1 with the following syntax: "<command type>.<search term>"
+	 * in array location 1 with the following syntax: "<COMMAND TYPE>.<search term>"
 	 */
 	private static void findCommand(List<String> args){
 		if(args.size() < 2){
