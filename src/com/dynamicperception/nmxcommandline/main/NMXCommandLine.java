@@ -63,18 +63,30 @@ public class NMXCommandLine {
 	}
 	
 	private static void printHelp(){
-		Console.pln("\nThis command line tool allows you to manually send single instuctions to the NMX controller.\n"
+		Console.pln("\n\n******** NMX Commander Overview ********\n\n"
+				+ "This command line tool allows you to manually send single instuctions to the NMX controller.\n"
 				+ "This is done by giving input with the following syntax:\n\n"
 				+ "Non-motor commands -- \"<command type>.<command name> <data (if required)>\"\n"
 				+ "Motor commands -- \"m.<command name> <motor #> <data (if required)>\"\n\n"
 				+ "Non-motor command types include \"g\" (general), \"c\" (camera), and \"k\" (key frame)\n"
 				+ "When specifying the motor number for motor commands, counting starts at 0 (i.e. valid motor #s are 0, 1, 2)\n\n"
-				+ "Here are some other useful commands:\n"
+				+ "******** Other Useful Commands ********\n\n"
 				+ "\"<command type>.<command name>\" -h -- prints command-specific help\n"
 				+ "\"help\" -- prints this information again\n"
 				+ "\"list <command type>\" -- lists all commands of that type\n"
 				+ "\"find <command type>.<search term>\" -- returns all commands of that type containing the search term\n"
-				+ "\"exit\" -- closes the serial port and exits the application\n");				
+				+ "\"exit\" -- closes the serial port and exits the application\n\n"
+				+ "******** Some Important Tips ********\n\n"
+				+ "* Valid microstep settings are 4, 8, and 16. The NMX does not use full or half steps in order to reduce vibation.\n\n"
+				+ "* The controller accepts and returns step counts that correspond to relevant motor's current microstep setting.\n"
+				+ "If the NMX reports a motor position of 500 when the microstep setting is 4, it will report 1000 when the microstep\n"
+				+ "setting is 8, and 2000 when the microstep setting is 16 (as long as the motor doesn't move). Same deal if you\n"
+				+ "command a motor to move somewhere. If you command a move of 10000 steps when in quarter stepping mode (i.e. microstep\n"
+				+ "setting = 4), it will go twice as far as when in eighth stepping mode (i.e. microstep setting = 8).\n"
+				+ "BE CAREFUL ABOUT THIS! If you accidentally send your rig two or four times as far as you intended, you can break\n"
+				+ "your valueable equipment!\n\n"
+				+ "* If you try to send a motor to a position and it either does not move or does not go all the way to where you sent it,\n"
+				+ "try running the command \"m.resetLimits <motor #>\" to clear any end limits that may be restricting movement.");				
 	}
 	
 	/**
