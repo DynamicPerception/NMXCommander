@@ -12,6 +12,7 @@ import java.util.List;
 
 import com.dynamicperception.nmxcommandline.coms.Serial;
 import com.dynamicperception.nmxcommandline.helpers.Console;
+import com.dynamicperception.nmxcommandline.helpers.Consts;
 import com.dynamicperception.nmxcommandline.models.Command;
 import com.dynamicperception.nmxcommandline.models.Command.Type;
 import com.dynamicperception.nmxcommandline.models.NMXComs;
@@ -23,36 +24,67 @@ public class NMXCommandLine {
 	final static String DELIMITER = " ";	
 	private static long lastTime;
 	
+	
 	public static void main(String[] args) {
+		// Create serial object
 		serial = new Serial();
+	
+		// Get user to select port
+		promptForPort();
 		
-		Serial.checkPorts();
-		Console.pln(Serial.list() + "\n");
-		
-		Console.p("Which serial port? ");
-		int port = Console.getInteger() - 1;
-		if(port < 0){
-			quit();
-		}
-		serial.openPort(port);		
-		NMXComs.setSerialObject(serial);
-		
+		// Enter program loop
 		execute = true;				
 		while(execute){
 			getCommand();
 		}		
 	}
 	
+	/**
+	 * Displays a list of available ports and prompts user for selection
+	 */
+	private static void promptForPort(){
+		// Population the serial port list and display it
+		Serial.checkPorts();
+		Console.pln(Serial.list() + "\n");
+		
+		// Ask user to open serial port
+		Console.p("Which serial port? ");
+		int port = Console.getInteger();
+		
+		// If an invalid port is supplied, try again		
+		if(port == Consts.ERROR){
+			promptForPort();
+			return;
+		}
+		if(port < 0){
+			quit();
+		}
+		serial.openPort(port-1 );		
+		NMXComs.setSerialObject(serial);	
+	}
+	
+	/**
+	 * Retrieves input from the console and passes it to command parser
+	 */
 	public static void getCommand(){
 		Console.p("\nCmd: ");
 		String cmd = Console.getString();			
 		parseCommand(cmd);
 	}
 	
+	/**
+	 * Parses command into discreet arguments, then passes arguments to
+	 * overloaded parseCommand() that accepts a List of arguments.
+	 * @param input Command string
+	 */
 	public static void parseCommand(String input){
 		parseCommand(getArgs(input, DELIMITER));
 	}
 
+	/**
+	 * Handles any application specific commands, then attempts to execute any NMX commands
+	 * @param args A List of String arguments that comprise the command
+	 */
 	public static void parseCommand(List<String> args){		
 		
 		// Request to quit
@@ -64,19 +96,26 @@ public class NMXCommandLine {
 			return;
 		}
 		// Run command list from file
-		else if(args.get(0).equals("run")){
+		else if(args.get(0).equals("runMacro")){
 			try {
-				runCommandFile();
+				if(args.size() == 1)
+					runCommandFile(Paths.get("c:/commandList.txt"));
+				else if(args.size() > 1){
+					runCommandFile(Paths.get(args.get(1)));
+				}				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			return;
 		}
-		else if(args.get(0).equals("runCSV")){			
+		// Replay a Graffik command log
+		else if(args.get(0).equals("replayLog")){			
 			try {
+				// If there is a second argument, use it as the log path
 				if(args.size() > 1)
-					runCsvCommandFile(args.get(1));
+					runCsvCommandFile(Paths.get(args.get(1)));
+				// Otherwise, use the default path
 				else
 					runCsvCommandFile();
 			} catch (IOException e) {
@@ -95,8 +134,8 @@ public class NMXCommandLine {
 			Command.help(Command.getType(args.get(1)));
 			return;
 		}
-		// Request to repeat command
-		else if(args.get(0).equals("r")){						
+		// Repeat the following command n times. (e.g. "repeat 2 m.getMS 0")
+		else if(args.get(0).equals("repeat")){						
 			int count = Integer.parseInt(args.get(1));			
 			for(int i = 0; i < 2; i++){
 				args.remove(0);
@@ -127,6 +166,13 @@ public class NMXCommandLine {
 		}
 	}
 	
+	/**
+	 * Executes a specified command 
+	 * @param args Command arguments as a list of String arguments with the following syntax:
+	 * <br>[0] == "&lt<b>command type</b>&gt.&lt<b>command name</b>&gt"
+	 * <br>[1] == "<b>-h</b>"  for help OR "&lt<b>command data</b>&gt" OR "&lt<b>motor number</b>&gt (optional)
+	 * <br>[2] == "&lt<b>command data</b>&gt"(if [1] == &lt<b>motor number</b>&gt (optional))  
+	 */
 	private static void runCommand(List<String> args){
 		
 		String cmdStr = "";
@@ -156,6 +202,11 @@ public class NMXCommandLine {
 		}	
 	}
 	
+	/**
+	 * Accepts a list of String arguments and finds commands that contain the search term 
+	 * @param args A list of String arguments. The search parameter must be
+	 * in array location 1 with the following syntax: "<command type>.<search term>"
+	 */
 	private static void findCommand(List<String> args){
 		if(args.size() < 2){
 			Console.pln("Invalid search syntax");
@@ -166,6 +217,12 @@ public class NMXCommandLine {
 		Command.find(term);		
 	}
 	
+	/**
+	 * Accepts a string and separates it into a list of arguments
+	 * @param input A string with command arguments separated by a designated delimiter
+	 * @param delimiter The char that separates command arguments
+	 * @return A list of strings representing command arguments
+	 */
 	private static List<String> getArgs(String input, String delimiter){		
 		String[] argArray = input.split(delimiter);
 		
@@ -176,8 +233,12 @@ public class NMXCommandLine {
 		return args;		
 	}
 	
-	private static void runCommandFile() throws IOException {
-		Path path = Paths.get("c:/commandList.txt");
+	/**
+	 * Runs a command macro file
+	 * @param path Path of the macro text file
+	 * @throws IOException
+	 */
+	private static void runCommandFile(Path path) throws IOException {		
 		
 		// Get the list of commands
 		final Charset ENCODING = StandardCharsets.UTF_8;
@@ -189,17 +250,17 @@ public class NMXCommandLine {
 		}		
 	}
 	
-	private static void runCsvCommandFile() throws IOException{
-		runCsvCommandFile("");
+	/**
+	 * Replays a Graffik command log from the default location
+	 */
+	private static void runCsvCommandFile() throws IOException{		
+		runCsvCommandFile(Paths.get("c:/commandLog.csv"));
 	}
 	
-	private static void runCsvCommandFile(String which) throws IOException {
-		Path path;
-		
-		if(which.equals(""))
-			path = Paths.get("c:/commandLog.csv");
-		else
-			path = Paths.get("c:/commandLog_"+which+".csv");
+	/**
+	 * Replays a Graffik command log from the specified path
+	 */
+	private static void runCsvCommandFile(Path path) throws IOException {		
 		
 		// Get the list of commands
 		final Charset ENCODING = StandardCharsets.UTF_8;
@@ -269,6 +330,9 @@ public class NMXCommandLine {
 		}		
 	}
 	
+	/**
+	 * Closes the serial port and quits the application
+	 */
 	private static void quit(){
 		if(Serial.isPortOpen())
 			serial.closePort();
