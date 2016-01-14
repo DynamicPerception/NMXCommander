@@ -119,6 +119,10 @@ public class Serial implements SerialPortEventListener {
 	  openPort(portName, baudRate);
   }
   
+  public void openPort(String portName) {
+	  openPort(portName, defaultBaudRate, 'N', 8, 1);
+  }
+  
   public void openPort(String portName, int baudRate) {
 	  openPort(portName, baudRate, 'N', 8, 1);
   }

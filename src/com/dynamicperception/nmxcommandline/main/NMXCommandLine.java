@@ -28,15 +28,53 @@ public class NMXCommandLine {
 	public static void main(String[] args) {
 		// Create serial object
 		serial = new Serial();
+		NMXComs.setSerialObject(serial);
 	
+		// If arguments ares supplied upon execution, run only those, then quit
+		if(args.length > 0){
+			try{
+				serial.openPort(args[0]);
+			}catch(RuntimeException e){
+				Console.pln("Invalid port! Either you picked the wrong number or you have the wrong syntax.\n"
+						+ "A full one-time execution should look something like this: "
+						+ "\"java -jar NMXCmd.jar COM32 m.sendTo 0 15000\"");
+				quit();
+			}
+			
+			List <String> commandArgs = new ArrayList<String>();
+			for(int i = 1; i < args.length; i++){				
+				commandArgs.add(args[i]);
+			}
+			parseCommand(commandArgs);			
+			quit();
+		}
+		
 		// Get user to select port
 		promptForPort();
+		
+		// Print help
+		printHelp();
 		
 		// Enter program loop
 		execute = true;				
 		while(execute){
 			getCommand();
 		}		
+	}
+	
+	private static void printHelp(){
+		Console.pln("\nThis command line tool allows you to manually send single instuctions to the NMX controller.\n"
+				+ "This is done by giving input with the following syntax:\n\n"
+				+ "Non-motor commands -- \"<command type>.<command name> <data (if required)>\"\n"
+				+ "Motor commands -- \"m.<command name> <motor #> <data (if required)>\"\n\n"
+				+ "Non-motor command types include \"g\" (general), \"c\" (camera), and \"k\" (key frame)\n"
+				+ "When specifying the motor number for motor commands, counting starts at 0 (i.e. valid motor #s are 0, 1, 2)\n\n"
+				+ "Here are some other useful commands:\n"
+				+ "\"<command type>.<command name>\" -h -- prints command-specific help\n"
+				+ "\"help\" -- prints this information again\n"
+				+ "\"list <command type>\" -- lists all commands of that type\n"
+				+ "\"find <command type>.<search term>\" -- returns all commands of that type containing the search term\n"
+				+ "\"exit\" -- closes the serial port and exits the application\n");				
 	}
 	
 	/**
@@ -60,7 +98,6 @@ public class NMXCommandLine {
 			quit();
 		}
 		serial.openPort(port-1 );		
-		NMXComs.setSerialObject(serial);	
 	}
 	
 	/**
@@ -95,6 +132,9 @@ public class NMXCommandLine {
 		else if(args.get(0).indexOf("//") != -1){
 			return;
 		}
+		else if(args.get(0).equals("help")){
+			printHelp();
+		}
 		// Run command list from file
 		else if(args.get(0).equals("runMacro")){
 			try {
@@ -125,13 +165,13 @@ public class NMXCommandLine {
 			return;
 		}
 		// Help request
-		else if(args.get(0).toLowerCase().equals("help")){
+		else if(args.get(0).toLowerCase().equals("list")){
 			if(args.size() < 2){
-				Console.pln("Help syntax -- \"help <command type>\"");
-				Console.pln("Example -> \"help c\" prints the list of valid camera commands");
+				Console.pln("List syntax -- \"list <command type>\"");
+				Console.pln("Example -> \"list c\" prints the list of valid camera commands");
 				return;
 			}				
-			Command.help(Command.getType(args.get(1)));
+			Command.printList(Command.getType(args.get(1)));
 			return;
 		}
 		// Repeat the following command n times. (e.g. "repeat 2 m.getMS 0")
@@ -336,7 +376,7 @@ public class NMXCommandLine {
 	private static void quit(){
 		if(Serial.isPortOpen())
 			serial.closePort();
-		Console.pln("Exiting application!");
+		//Console.pln("Exiting application!");
 		System.exit(0);
 	}
 
