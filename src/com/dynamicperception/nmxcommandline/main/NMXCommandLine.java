@@ -23,7 +23,7 @@ public class NMXCommandLine {
 	private static Serial serial;
 	final static String DELIMITER = " ";	
 	private static long lastTime;
-	
+	private static String version = "0.1-beta"; 
 	
 	public static void main(String[] args) {
 		// Create serial object
@@ -66,7 +66,7 @@ public class NMXCommandLine {
 	 * Prints general application help
 	 */
 	private static void printHelp(){
-		Console.pln("\n\n******** NMX Commander Overview ********\n\n"
+		Console.pln("\n\n******** NMX Commander " + version + " Overview ********\n\n"
 				+ "This command line tool allows you to manually send single instuctions to the NMX controller.\n"
 				+ "This is done by giving input with the following syntax:\n\n"
 				+ "Non-motor commands -- \"<command type>.<command name> <data (if required)>\"\n"
@@ -105,7 +105,7 @@ public class NMXCommandLine {
 		Console.pln(Serial.list() + "\n");
 		
 		// Ask user to open serial port
-		Console.p("Which serial port? ");
+		Console.p("Connect to NMX on which serial port? ");
 		int port = Console.getInteger();
 		
 		// If an invalid port is supplied, try again		
