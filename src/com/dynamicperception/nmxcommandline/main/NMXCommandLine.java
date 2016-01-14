@@ -93,7 +93,7 @@ public class NMXCommandLine {
 				+ "When specifying the motor number for motor commands, counting starts at 0 (i.e. valid motor #s are 0, 1, 2)\n\n"
 				+ "******** Other Useful Commands ********\n\n"
 				+ "* \"help\" -- prints this information again\n\n"
-				+ "* \"<COMMAND TYPE>.<COMMAND NAME>\" -h -- prints command-specific help\n\n"
+				+ "* \"<COMMAND TYPE>.<COMMAND NAME> -h\" -- prints command-specific help\n\n"
 				+ "* \"list <COMMAND TYPE>\" -- lists all commands of that type\n\n"
 				+ "* \"find <COMMAND TYPE>.<SEARCH TERM>\" -- returns all commands of that type containing the search term\n\n"
 				+ "* \"runMacro <PATH>\" -- runs a command macro list from a text file. Type \"runMacro\" without arguments\n"
