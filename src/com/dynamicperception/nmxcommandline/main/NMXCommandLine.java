@@ -185,7 +185,7 @@ public class NMXCommandLine {
 					Console.pln("The text file should have one command on each line with the following syntax:\n\n"
 							+ "\"<DELAY TIME> <COMMAND TYPE>.<COMMAND NAME> <DATA or MOTOR # (if needed)> <MOTOR DATA (if needed)>\"\n\n"
 							+ "The following example enables the camera, sets the focus time to 600ms, trigger time to 100ms, sets home\n"
-							+ "for each the motors (e.g. sets current position to 0), immediately takes an exposure, commands the motors to\n"
+							+ "for each of the motors (e.g. sets current position to 0), immediately takes an exposure, commands the motors to\n"
 							+ "a new position, waits 5000ms, takes another exposure, waits 1000ms, commands the motors back to their original\n"
 							+ "positions, waits 5000ms, then takes a final exposure:\n\n"
 							+ "0 c.setEnable 1\n"
