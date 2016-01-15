@@ -161,8 +161,12 @@ public class NMXCommandLine {
 	 */
 	private static void parseCommand(List<String> args){		
 		
+		if(args.get(0).trim().length() == 0){
+			// Ignore blank lines
+			return;
+		}
 		// Request to quit
-		if(args.get(0).equals("exit")){
+		else if(args.get(0).equals("exit")){
 			quit();
 		}		
 		// Skip if it's a comment line
