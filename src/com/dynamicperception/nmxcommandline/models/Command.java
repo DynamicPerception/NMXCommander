@@ -603,8 +603,8 @@ private static void initCommands(){
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 121, Long.class, Names.KeyFrame.GET_RUN_TIME));
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 122, Long.class, Names.KeyFrame.GET_MAX_RUN_TIME));
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 123, Integer.class, Names.KeyFrame.GET_PCT_DONE));
-		keyFrameList.add(new Command(Command.Type.KEYFRAME, 130, Long.class, Names.KeyFrame.GET_KF_ABSCISSA, Integer.class));
-		keyFrameList.add(new Command(Command.Type.KEYFRAME, 131, Long.class, Names.KeyFrame.GET_KF_POS, Integer.class));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 130, Integer.class, Names.KeyFrame.GET_KF_ABSCISSA, Integer.class));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 131, Integer.class, Names.KeyFrame.GET_KF_POS, Integer.class));
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 132, Float.class, Names.KeyFrame.GET_KF_VEL, Integer.class));
 	}
 	
