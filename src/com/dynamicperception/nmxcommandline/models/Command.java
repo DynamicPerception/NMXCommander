@@ -2,6 +2,9 @@ package com.dynamicperception.nmxcommandline.models;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import com.dynamicperception.graffik.nmx.Command;
+import com.dynamicperception.graffik.nmx.Command.Names;
 import com.dynamicperception.nmxcommandline.helpers.Consts;
 
 public class Command {
@@ -254,6 +257,10 @@ public class Command {
 			public static final String GET_RUN_TIME		= "k.getRunTime";
 			public static final String GET_MAX_RUN_TIME = "k.getMaxRunTime";
 			public static final String GET_PCT_DONE		= "k.getPctDone";			
+			
+			public static final String GET_KF_ABSCISSA	= "k.getKfTime";
+			public static final String GET_KF_POS		= "k.getKfPos";
+			public static final String GET_KF_VEL		= "k.getKfVel";
 		}
 	}
 	
@@ -597,6 +604,9 @@ private static void initCommands(){
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 121, Long.class, Names.KeyFrame.GET_RUN_TIME));
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 122, Long.class, Names.KeyFrame.GET_MAX_RUN_TIME));
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 123, Integer.class, Names.KeyFrame.GET_PCT_DONE));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 130, Long.class, Names.KeyFrame.GET_KF_ABSCISSA, Integer.class));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 131, Long.class, Names.KeyFrame.GET_KF_POS, Integer.class));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 132, Float.class, Names.KeyFrame.GET_KF_VEL, Integer.class));
 	}
 	
 	/** 
