@@ -925,7 +925,7 @@ public class Command {
 			ret = (T) returnType.cast(response);
 		}
 		else if(returnType == Float.class){			
-			ret = (T) returnType.cast((float) response / FLOAT_CONVERSION);
+			ret = (T) returnType.cast((float) response / Consts.FLOAT_CONVERSION);
 		}
 		else if(returnType == Boolean.class){
 			ret = (T) returnType.cast(response == 0 ? false : true);			
