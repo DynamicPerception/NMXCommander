@@ -25,7 +25,6 @@ public class Command {
 	private int dataLength;
 	private Class<?> returnType;	
 	private HelpCommand helpCommand;
-	private AuxCommand auxCommand;
 	
 	public void help(){
 		helpCommand.helpCommand();
@@ -39,11 +38,11 @@ public class Command {
 		public void helpCommand();
 	}
 	
-	public static interface AuxCommand{
-		public int preCommand();		
-		public int postCommand(int subAddr, int returnVal);
-	}
-	
+	/**
+	 * Reference values for setting debug state on NMX
+	 * @author Michael
+	 *
+	 */
 	public static class NMXDebug {
 		public static final int COM = 1;
 		public static final int STEPS = 2;
@@ -53,6 +52,11 @@ public class Command {
 		public static final int CONFIRM = 32;
 	}
 	
+	/**
+	 * String names for each NMX motor command
+	 * @author Michael
+	 *
+	 */
 	public static class Names{	
  
 		public static class General {
@@ -252,6 +256,7 @@ public class Command {
 			public static final String GET_ACCEL_AT		= "k.getAccelAt";			
 			public static final String IS_VEL_VALID		= "k.isVelValid";
 			public static final String IS_ACCEL_VALID	= "k.isAccelValid";
+			public static final String GET_CONT_VID_DUR = "k.getContVidDur";
 			public static final String GET_RUN_STATE 	= "k.getRunState";
 			public static final String GET_RUN_TIME		= "k.getRunTime";
 			public static final String GET_MAX_RUN_TIME = "k.getMaxRunTime";
@@ -263,10 +268,20 @@ public class Command {
 		}
 	}
 	
+	/**
+	 * Possible command types: GENERAL, MOTOR, CAMERA, KEYFRAME, NOT_A_TYPE
+	 * @author Michael
+	 *
+	 */
 	public static enum Type{
 		GENERAL, MOTOR, CAMERA, KEYFRAME, NOT_A_TYPE;
 	}
 	
+	/**
+	 * Possible data lengths to be appended to a command: NULL, BYTE, INT, LONG, FLOAT
+	 * @author Michael
+	 *
+	 */
 	public static enum Length{
 		NULL, BYTE, INT, LONG, FLOAT;
 	}
@@ -274,45 +289,50 @@ public class Command {
 	/* Constructor and Initialization Method */
 	
 	// Commands that transmit one or more data bytes	
-	Command(Command.Type type, int command, Class<?> returnType, String name, Class<?> dataType){		
-		AuxCommand auxCommand = null;
-		this.init(type, command, returnType, name, dataType, auxCommand);
+	/** Private constructor
+	 * @param type Command type, see {@link Type}
+	 * @param command Command number; must correspond to switch case number in NMX firmware.
+	 * @param returnType Class of the return value type
+	 * @param name	Name of the command as a String
+	 * @param dataType	Class of the data value type
+	 */
+	private Command(Command.Type type, int command, Class<?> returnType, String name, Class<?> dataType){		
+		this.init(type, command, returnType, name, dataType);
 	}
 	
-	Command(Command.Type type, int command, String name, Class<?> dataType){
-		AuxCommand auxCommand = null;
-		this.init(type, command, Void.class, name, dataType, auxCommand);
+	/** Private constructor
+	 * @param type Command type, see {@link Type}
+	 * @param command Command number; must correspond to switch case number in NMX firmware.
+	 * @param name	Name of the command as a String
+	 * @param dataType	Class of the data value type
+	 */
+	private Command(Command.Type type, int command, String name, Class<?> dataType){		
+		this.init(type, command, Void.class, name, dataType);
 	}
-	
-	Command(Command.Type type, int command, Class<?> returnType, String name, Class<?> dataType, AuxCommand auxCommand){		
-		this.init(type, command, returnType, name, dataType, auxCommand);
-	}
-	
-	Command(Command.Type type, int command, String name, Class<?> dataType, AuxCommand auxCommand){		
-		this.init(type, command, Void.class, name, dataType, auxCommand);
-	}
-	
+		
 	// Commands that transmit no additional data
-	Command(Command.Type type, int command, Class<?> returnType, String name){
-		AuxCommand auxCommand = null;
-		this.init(type, command, returnType, name, Void.class, auxCommand);
+	/** Private constructor
+	 * @param type Command type, see {@link Type}
+	 * @param command Command number; must correspond to switch case number in NMX firmware.
+	 * @param returnType Class of the return value type
+	 * @param name	Name of the command as a String
+	 * @param dataType	Class of the data value type
+	 */
+	private Command(Command.Type type, int command, Class<?> returnType, String name){
+		this.init(type, command, returnType, name, Void.class);
 	}
 	
-	Command(Command.Type type, int command, String name){
-		AuxCommand auxCommand = null;
-		this.init(type, command, Void.class, name, Void.class, auxCommand);
+	/** Private constructor
+	 * @param type Command type, see {@link Type}
+	 * @param command Command number; must correspond to switch case number in NMX firmware.
+	 * @param name	Name of the command as a String
+	 */
+	protected Command(Command.Type type, int command, String name){		
+		this.init(type, command, Void.class, name, Void.class);
 	}	
 	
-	Command(Command.Type type, int command, Class<?> returnType, String name, AuxCommand auxCommand){
-		this.init(type, command, returnType, name, Void.class, auxCommand);
-	}
-	
-	Command(Command.Type type, int command, String name, AuxCommand auxCommand){
-		this.init(type, command, Void.class, name, Void.class, auxCommand);	
-	}
-	
-	private void init(Command.Type type, int command, Class<?> returnType, String name, Class<?> dataType, AuxCommand auxCommand){
-		this.auxCommand = auxCommand;
+	private void init(Command.Type type, int command, Class<?> returnType, String name, Class<?> dataType){
+		this.helpCommand = null;
 		this.name = name;
 		this.type = type;
 		this.command = command;			
@@ -345,7 +365,7 @@ public class Command {
 		}
 		this.helpCommand = new DefaultHelp(this);
 	}
-
+	
 	
 	/* Static Methods */
 	
@@ -395,7 +415,7 @@ public class Command {
 		listsInitialized = true;
 	}
 	
-private static void initCommands(){
+	private static void initCommands(){
 		
 		//******** Help Commands ********//
 		class DebugHelp implements HelpCommand{
@@ -597,7 +617,8 @@ private static void initCommands(){
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 103, Float.class, Names.KeyFrame.GET_VEL_AT, Float.class));
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 104, Float.class, Names.KeyFrame.GET_ACCEL_AT, Float.class));
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 105, Names.KeyFrame.IS_VEL_VALID));
-		keyFrameList.add(new Command(Command.Type.KEYFRAME, 106, Boolean.class, Names.KeyFrame.IS_ACCEL_VALID));		
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 106, Boolean.class, Names.KeyFrame.IS_ACCEL_VALID));
+		keyFrameList.add(new Command(Command.Type.KEYFRAME, 107, Integer.class, Names.KeyFrame.GET_CONT_VID_DUR));		
 
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 120, Integer.class, Names.KeyFrame.GET_RUN_STATE));
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 121, Long.class, Names.KeyFrame.GET_RUN_TIME));
@@ -737,27 +758,6 @@ private static void initCommands(){
 	public static int getControllerNum(){
 		return currentControllerNum;
 	}
-		
-	/* Non-Static Methods */
-	
-	public String getName(){
-		return name;
-	}
-	
-	public Type getType(){
-		return this.type;
-	}
-	
-	public int getCommandNum(){
-		return this.command;
-	}
-	
-	public void printInfo(){
-		System.out.println("Command type: " + this.type);
-		System.out.println("Number: " + this.command);
-		System.out.println("Name: " + this.name);
-		System.out.println("Return type: " + this.returnType.getName());		
-	}
 	
 	public static <T>T execute(String name){
 		return Command.get(name).executeThis();
@@ -795,9 +795,40 @@ private static void initCommands(){
 		return Command.get(name).executeThis(Integer.toString(motor), Float.toString(data));
 	}
 	
-	public <T>T executeThis(){
+	
+	/* Non-Static Methods */
+	
+	/**
+	 * Returns the name of the command on which it is called 
+	 * @return Command name as a string
+	 */
+	public String getName(){
+		return name;
+	}
+	
+	/**
+	 * Returns the type of the command on which it is called
+	 * @return The 
+	 */
+	public Type getType(){
+		return this.type;
+	}
+	
+	public int getCommandNum(){
+		return this.command;
+	}
+	
+	public void printInfo(){
+		System.out.println("Command type: " + this.type);
+		System.out.println("Number: " + this.command);
+		System.out.println("Name: " + this.name);
+		System.out.println("Return type: " + this.returnType.getName());		
+	}
+	
+	private <T>T executeThis(){
 		if(this.type == Command.Type.MOTOR){
 			System.out.println("This is a motor command; the motor number must be specified to execute");			
+			this.printInfo();
 			throw new UnsupportedOperationException();
 		}
 		else{
@@ -805,11 +836,12 @@ private static void initCommands(){
 		}
 	}
 	
-	public <T>T executeThis(String dataOrMotor){
+	private <T>T executeThis(String dataOrMotor){
 		if(this.type == Command.Type.MOTOR){
 			int motor = Integer.parseInt(dataOrMotor);
 			if(motor < 0 || motor > Consts.MOTOR_COUNT){
 				System.out.println("Invalid motor number");
+				this.printInfo();
 				throw new UnsupportedOperationException();				
 			}
 			int tempSubaddr = motor + 1;
@@ -820,11 +852,12 @@ private static void initCommands(){
 		}
 	}
 	
-	public <T>T executeThis(String motor, String data){
+	private <T>T executeThis(String motor, String data){
 		if(this.type == Command.Type.MOTOR){
 			int motorNum = Integer.parseInt(motor);
 			if(motorNum < 0 || motorNum > Consts.MOTOR_COUNT){
 				System.out.println("Invalid motor number");
+				this.printInfo();
 				throw new UnsupportedOperationException();				
 			}
 			int tempSubaddr = motorNum + 1;
@@ -832,23 +865,21 @@ private static void initCommands(){
 		}	
 		else{
 			System.out.println("This is a non-motor command; a motor number may not be specified");			
+			this.printInfo();
 			throw new UnsupportedOperationException();				
 		} 
 	}
 	
 	@SuppressWarnings("unchecked")
-	private <T>T executeThis(int subaddr, String dataStr, boolean hasData){
+	private <T>T executeThis(int subAddr, String dataStr, boolean hasData){
 
 		// Notify if data is attached to a command that does not take additional data
 		if(dataLength == 0 && hasData){			
 			System.out.println("This command does not send additional data");			
+			this.printInfo();
 			throw new UnsupportedOperationException();
 		}
-		
-		// Do any pre-command action
-		if(auxCommand != null)
-			auxCommand.preCommand();
-		
+
 		// Parse the data, if necessary
 		int data = 0;		
 		if(hasData){			
@@ -868,48 +899,50 @@ private static void initCommands(){
 				System.out.println("Parsed int: " + data);
 			}
 		}		
-	
-		//System.out.println("Command out: " + addr + " " + subaddr + " " + command + " " + dataLength + " " + data);
-		
+			
 		// Send the command to the NMX
 		if(hasData){			
-			NMXComs.cmd(addr, subaddr, command, dataLength, data);
+			NMXComs.cmd(addr, subAddr, this.command, this.dataLength, data);
 		}
 		else{
-			NMXComs.cmd(addr, subaddr, command);			
+			NMXComs.cmd(addr, subAddr, this.command);			
 		}
 		
 		// Wait for the NMX to clear
 		waitForNMX();	
+					
+		// Do any post command action or manipulation of the return value
+		int response = 0;
 		
+		// Don't fetch a response if none is expected
+		if(returnType != Void.class){
+			response = NMXComs.getResponseVal();
+		}
+
 		// Cast the return value to the proper response type
 		T ret = null;
 		if(returnType == Integer.class){
-			ret = (T) returnType.cast(NMXComs.getResponseVal());
+			ret = (T) returnType.cast(response);
 		}
 		else if(returnType == Float.class){			
-			ret = (T) returnType.cast((float) NMXComs.getResponseVal() / Consts.FLOAT_CONVERSION);
+			ret = (T) returnType.cast((float) response / FLOAT_CONVERSION);
 		}
 		else if(returnType == Boolean.class){
-			ret = (T) returnType.cast(NMXComs.getResponseVal() == 0 ? false : true);			
+			ret = (T) returnType.cast(response == 0 ? false : true);			
 		}
 		// Void return type
 		else{			
-			ret = (T) Void.class.cast(ret);
+			ret = (T) Void.class.cast(null);
 		}
 		
 		// Print debug if necessary
-		//if(debug){
+		if(debug){
 			System.out.println("Command: " + this.name);
-		//}
+		}
 		if(ret != null)
 			System.out.println(ret);
 		else
 			System.out.println("OK!");
-		
-		// Do any post command action
-		if(auxCommand != null)
-			auxCommand.postCommand(subaddr, Integer.class.cast(ret));
 		
 		// Return the value
 		return ret;
@@ -927,12 +960,18 @@ private static void initCommands(){
 		}		
 	}	
 
+	/**
+	 * Causes the thread to sleep for 10 milliseconds
+	 */
 	public static void commandWait(){
 		commandWait(10);
 	}
 	
+	/**
+	 * Causes the thread to sleep for the specified time
+	 * @param time The sleep time in milliseconds
+	 */
 	public static void commandWait(int time){
-		//System.out.println("Waiting for NMXComs to free");
 		while(NMXComs.isBusy()){			
 			// Wait till the NMX communications class is free again before proceeding
 			try {
@@ -942,7 +981,6 @@ private static void initCommands(){
 				e.printStackTrace();
 			}
 		}
-		//System.out.println("NMXComs now available!");
 	}
 
 }
