@@ -24,7 +24,7 @@ public class NMXCommandLine {
 	private static Serial serial;
 	final static String DELIMITER = " ";	
 	private static long lastTime;
-	private static String version = "0.1-beta"; 
+	private static String version = "0.2-beta"; 
 	
 	public static void main(String[] args) {
 		// Create serial object
