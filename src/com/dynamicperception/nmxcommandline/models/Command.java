@@ -671,7 +671,7 @@ public class Command {
 		motorList.add(new Command(Command.Type.MOTOR, 29, Names.Motor.SET_START_HERE));
 		motorList.add(new Command(Command.Type.MOTOR, 30, Names.Motor.SET_STOP_HERE, Byte.class));	
 		motorList.add(new Command(Command.Type.MOTOR, 31, Names.Motor.SEND_TO, Long.class));
-		Command moveAtVel = new Command(Command.Type.MOTOR, 31, Names.Motor.MOVE_AT_VEL, Float.class);		
+		Command moveAtVel = new Command(Command.Type.MOTOR, 1000, Names.Motor.MOVE_AT_VEL, Float.class);		
 		class MoveAtVelExecute implements ExecuteStructure{
 			Command thisCommand;
 			
