@@ -14,6 +14,7 @@ import com.dynamicperception.nmxcommandline.coms.Serial;
 import com.dynamicperception.nmxcommandline.helpers.Console;
 import com.dynamicperception.nmxcommandline.helpers.Consts;
 import com.dynamicperception.nmxcommandline.models.Command;
+import com.dynamicperception.nmxcommandline.models.Command.Names;
 import com.dynamicperception.nmxcommandline.models.Command.Type;
 import com.dynamicperception.nmxcommandline.models.NMXComs;
 
@@ -292,14 +293,14 @@ public class NMXCommandLine {
 				return;
 			}
 			
-			if(args.size() == 1){				
-				thisCommand.executeThis();
+			if(args.size() == 1){			
+				Command.execute(cmdStr);				
 			}
-			else if(args.size() == 2){				
-				thisCommand.executeThis(args.get(1));
+			else if(args.size() == 2){
+				Command.execute(cmdStr, args.get(1));				
 			}
-			else if(args.size() == 3){				
-				thisCommand.executeThis(args.get(1), args.get(2));
+			else if(args.size() == 3){
+				Command.execute(cmdStr, args.get(1), args.get(2));				
 			}			
 		}catch(UnsupportedOperationException e){
 			Console.pln("Not a valid command");

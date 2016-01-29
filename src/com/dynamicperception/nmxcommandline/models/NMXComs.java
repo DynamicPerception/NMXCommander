@@ -255,7 +255,8 @@ public class NMXComs {
 		if(response.equals("0000000000ff00000100"))
 			return;
 		if(response.equals("")){
-			System.out.println("Empty response!");
+			if(serialDetail)
+				System.out.println("Empty response!");
 			responseVal = Consts.ERROR;
 			emptyResponseCount++;
 			return;
