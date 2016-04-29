@@ -892,7 +892,7 @@ public class Command {
 		System.out.println("Return type: " + this.returnType.getName());		
 	}
 	
-	private <T>T executeThis(){
+	public <T>T executeThis(){
 		if(this.type == Command.Type.MOTOR){
 			System.out.println("This is a motor command; the motor number must be specified to execute");			
 			this.printInfo();
@@ -903,7 +903,7 @@ public class Command {
 		}
 	}
 	
-	private <T>T executeThis(String dataOrMotor){
+	public <T>T executeThis(String dataOrMotor){
 		if(this.type == Command.Type.MOTOR){
 			int motor = Integer.parseInt(dataOrMotor);
 			if(motor < 0 || motor > MOTOR_COUNT){
@@ -919,7 +919,7 @@ public class Command {
 		}
 	}
 	
-	private <T>T executeThis(String motor, String data){
+	public <T>T executeThis(String motor, String data){
 		if(this.type == Command.Type.MOTOR){
 			int motorNum = Integer.parseInt(motor);
 			if(motorNum < 0 || motorNum > MOTOR_COUNT){
