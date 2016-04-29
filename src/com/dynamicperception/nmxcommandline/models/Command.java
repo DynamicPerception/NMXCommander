@@ -675,6 +675,19 @@ public class Command {
 		keyFrameList.add(new Command(Command.Type.KEYFRAME, 132, Float.class, Names.KeyFrame.GET_KF_VEL, Integer.class));
 	}
 	
+	public static void help(Type type){				
+		if(type == Type.NOT_A_TYPE){
+			System.out.println("Not a valid command type");
+			return;
+		}
+		Command.checkInitialization();
+		List<Command> thisList = Command.getList(type);
+		System.out.println("\n******** " + type + " COMMAND LIST ********");
+		for(int i = 0; i < thisList.size(); i++){
+			System.out.println(thisList.get(i).getName());
+		}
+	}
+	
 	/** 
 	 * Fetch command list from type
 	 * @param type The type of commands wanted
