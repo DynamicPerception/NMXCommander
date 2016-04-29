@@ -13,7 +13,6 @@ import java.util.List;
 import com.dynamicperception.nmxcommandline.coms.Serial;
 import com.dynamicperception.nmxcommandline.helpers.Console;
 import com.dynamicperception.nmxcommandline.models.Command;
-import com.dynamicperception.nmxcommandline.models.Command.Type;
 import com.dynamicperception.nmxcommandline.models.NMXComs;
 
 public class NMXCommandLine {
@@ -21,7 +20,7 @@ public class NMXCommandLine {
 	private static boolean execute;
 	private static Serial serial;
 	final static String DELIMITER = " ";	
-	private static long lastTime;
+	//private static long lastTime;
 	
 	public static void main(String[] args) {
 		serial = new Serial();
@@ -123,7 +122,7 @@ public class NMXCommandLine {
 		else{
 			//System.out.println("Last command loaded time elapsed: " + (System.nanoTime() - lastTime));
 			runCommand(args);
-			lastTime = System.nanoTime();
+			//lastTime = System.nanoTime();
 		}
 	}
 	
