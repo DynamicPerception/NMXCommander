@@ -32,6 +32,7 @@ public class NMXComs {
 	private static boolean responseOn = true;		
 	private static String response = "";
 	private static int responseVal;
+	private static int responseTimeout = 500;
 	
 	private static int emptyResponseCount = 0;
 			
@@ -44,6 +45,11 @@ public class NMXComs {
 	public static void setSerialDetail(boolean enabled){
 		serialDetail = enabled;
 	}	
+	
+	public static boolean getSerialDetail(){
+		return serialDetail;
+	}	
+	
 	
 	/**
 	 * Sets any manually configured data that will be added before the main data segment of the
@@ -83,6 +89,22 @@ public class NMXComs {
 		return sendingCommand;
 	}
 	
+	/**
+	 * Sets the response timeout
+	 * @param timeout response timeout in milliseconds
+	 */
+	public static void setResponseTimeout(int timeout){
+		responseTimeout = timeout;
+	}
+	
+	/**
+	 * Gets the response timeout
+	 * @return response timeout in milliseconds
+	 */
+	public static int getResponseTimeout(){
+		return responseTimeout;
+	}
+	
 	/** 
 	 * @return The value associated with the response to the last command sent
 	 */
@@ -111,12 +133,12 @@ public class NMXComs {
 	 * @param command
 	 *            NMX command number (DEC)
 	 */
-	public static void cmd(int addr, int subAddr, int command) {
-		cmd(addr, subAddr, command, 0, 0);
+	public static String cmd(int addr, int subAddr, int command) {
+		return cmd(addr, subAddr, command, 0, 0);
 	}
 	
-	public static void cmd(int addr, int subAddr, int command, boolean getException) throws InterruptedException{
-		cmd(addr, subAddr, command, 0, 0, true, true);
+	public static String cmd(int addr, int subAddr, int command, boolean getException) throws InterruptedException{
+		return cmd(addr, subAddr, command, 0, 0, true, true);
 	}
 
 	
@@ -134,17 +156,18 @@ public class NMXComs {
 	 * @param data
 	 *            Data to be included in the packet
 	 */
-	public static void cmd(int addr, int subAddr, int command, int length, int data) {
+	public static String cmd(int addr, int subAddr, int command, int length, int data) {
 		try {
-			cmd(addr, subAddr, command, length, data, true);
+			return cmd(addr, subAddr, command, length, data, true);
 		} catch (InterruptedException e) {
 			System.out.println("NMX Command interrupted during waiting period");
 			e.printStackTrace();
+			return "ERROR";
 		}
 	}
 	
-	public static void cmd(int addr, int subAddr, int command, int length, int data, boolean getResponse, boolean getException) throws InterruptedException{
-		cmd(addr, subAddr, command, length, data, getResponse);
+	public static String cmd(int addr, int subAddr, int command, int length, int data, boolean getResponse, boolean getException) throws InterruptedException{
+		return cmd(addr, subAddr, command, length, data, getResponse);
 	}
 
 	/**
@@ -165,7 +188,7 @@ public class NMXComs {
 	 *            If this parameter is false, the program will not wait for a
 	 *            response from the NMX
 	 */
-	public static void cmd(int addr, int _subAddr, int _command, int _length, int _data, boolean getResponse) throws InterruptedException {
+	public static String cmd(int addr, int _subAddr, int _command, int _length, int _data, boolean getResponse) throws InterruptedException {
 		
 		responseOn = getResponse;
 		
@@ -201,6 +224,8 @@ public class NMXComs {
 		
 		// Set command ready flag to trigger command thread		
 		sendingCommand = true;
+		
+		return commandPacket;
 	}
 
 	
@@ -233,7 +258,7 @@ public class NMXComs {
 	private static void parseResponse() {		
 		
 		if(serialDetail)
-			System.out.println("Response before parsing: " + response);
+			System.out.println("NMX raw response: " + response);
 		
 		if(!responseOn){
 			responseVal = ERROR;
@@ -278,7 +303,7 @@ public class NMXComs {
 			System.out.println("Error parsing data type: " + response);
 		} catch (StringIndexOutOfBoundsException e) {
 			if(serialDetail)
-				System.out.println("Out of bounds!!!");
+				System.out.println("Response value out of bounds!!!");
 		}
 		
 		responseVal = (int) data;
@@ -354,8 +379,7 @@ public class NMXComs {
 					// Wait for full packet before proceeding
 					long waitStart = System.currentTimeMillis();
 					// Give up if the first byte isn't received before the start timeout,
-					// or the packet isn't finished before the final timeout					
-					final int FINAL_TIMEOUT = 90; 
+					// or the packet isn't finished before the final timeout
 					final int DATA_LENGTH_BYTE = 9;
 					while(waitingForPreamble || dataRemaining > 0){
 						if(serial.available() > 0){
@@ -385,8 +409,9 @@ public class NMXComs {
 						}
 						// Check for timeouts
 						long curTime = System.currentTimeMillis();						
-						if(curTime - waitStart > FINAL_TIMEOUT){
+						if(curTime - waitStart > responseTimeout){
 							response = ERROR_STR;
+							serial.clear();
 							break;
 						}
 					}												
@@ -397,6 +422,7 @@ public class NMXComs {
 							response = response + debug;
 						}			
 					}
+
 					// Extract the data from the response packet					
 					parseResponse();
 
