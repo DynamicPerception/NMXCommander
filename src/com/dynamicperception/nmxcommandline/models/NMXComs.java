@@ -1,10 +1,14 @@
 package com.dynamicperception.nmxcommandline.models;
 
-import com.dynamicperception.nmxcommandline.helpers.Consts;
-import com.dynamicperception.nmxcommandline.helpers.ThreadManagement;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.dynamicperception.nmxcommandline.coms.Serial;
 
 public class NMXComs {
+	
+	private static final int ERROR = (int) -1e9;
+	private static final String ERROR_STR = "ERROR";
 	
 	// Serial object
 	private static Serial serial;
@@ -26,20 +30,11 @@ public class NMXComs {
 	
 	// Response handling
 	private static boolean responseOn = true;		
-	private static int responseDelay = 50;	
 	private static String response = "";
 	private static int responseVal;
 	
 	private static int emptyResponseCount = 0;
 			
-	// Response delay options
-	protected static class ResponseTiming{		
-		public final static int DEFAULT = 80;
-		public final static int NO_RESPONSE = 30;
-		public final static int EEPROM = 300;	
-		public final static int LONG_WAIT = 1500;
-	}
-	
 	
 	// ******** Setters and Getters ******** // 
 	
@@ -49,14 +44,6 @@ public class NMXComs {
 	public static void setSerialDetail(boolean enabled){
 		serialDetail = enabled;
 	}	
-	
-	/**
-	 * Sets how long the command thread should wait before trying to fetch a response packet
-	 * @param millis Time in milliseconds
-	 */
-	public static void setResponseDelay(int millis){
-		responseDelay = millis;
-	}
 	
 	/**
 	 * Sets any manually configured data that will be added before the main data segment of the
@@ -78,8 +65,8 @@ public class NMXComs {
 	}
 	
 	/**
-	 * This differs from the isSendingCommand() method in that isBusy() returns true once 
-	 * the command has starting being processed, while isSendingCommand() returns true only once 
+	 * This differs from the {@link #isSendingCommand()} method in that isBusy() returns true once 
+	 * the command has starting being processed, while {@link #isSendingCommand()} returns true only once 
 	 * the command thread has been flagged and has started sending the command to the controller.
 	 * 
 	 * @return Whether the command sending process is in process. T
@@ -89,7 +76,7 @@ public class NMXComs {
 	}
 
 	/** 
-	 * See isBusy() Javadoc for more clarification
+	 * See {@link #isBusy()}() for more clarification
 	 * @return Whether the command thread is busy
 	 */
 	public static boolean isSendingCommand(){
@@ -101,12 +88,14 @@ public class NMXComs {
 	 */
 	protected static int getResponseVal(){
 		int ret = responseVal;		
-		if(ret == Consts.ERROR ){
+		if(ret == ERROR ){			
 			System.out.println("COM error caused by command packet: " + commandPacket);
+//			Exception e = new UnsupportedOperationException();
+//			e.printStackTrace();
 		}
 		// Set the response value to the error value so if there is a problem
 		// with the next response, the error value will be returned		
-		responseVal = Consts.ERROR;
+		responseVal = ERROR;
 		return ret;
 	}
 	
@@ -243,28 +232,33 @@ public class NMXComs {
 	 */
 	private static void parseResponse() {		
 		
-		if(!responseOn){
-			responseVal = Consts.ERROR;
-			return;
-		}
-
 		if(serialDetail)
 			System.out.println("Response before parsing: " + response);
+		
+		if(!responseOn){
+			responseVal = ERROR;
+			return;
+		}
 		
 		// This is an "OK" confirmation code, ignore it
 		if(response.equals("0000000000ff00000100"))
 			return;
 		if(response.equals("")){
 			System.out.println("Empty response!");
-			responseVal = Consts.ERROR;
+			responseVal = ERROR;
 			emptyResponseCount++;
+			return;
+		}
+		if(response.equals(ERROR_STR)){
+			System.out.println("~~~RESPONSE TIMEOUT ERROR~~~");
+			responseVal = ERROR;
 			return;
 		}
 		emptyResponseCount = 0;
 
 		// int length = Integer.decode("0x" + response.substring(18, 20));
 		int data_type = 7;
-		long data = Consts.ERROR;
+		long data = ERROR;
 		try {
 			data_type = Integer.decode("0x" + response.substring(20, 22));
 			try {
@@ -305,6 +299,16 @@ public class NMXComs {
 		
 		volatile boolean execute;		
 		
+		int verifyPacketHeader(List<Integer> inBytes){
+			final String HEADER = "0000000000ff";
+			String inByteStr = "";
+			for(int x : inBytes){
+				String thisByte = x <= 15 ? "0" + Integer.toHexString(x) : Integer.toHexString(x);
+				inByteStr += thisByte;
+			}
+			return inByteStr.indexOf(HEADER);
+		}
+		
 		public void run(){
 			execute = true;
 			while(execute){
@@ -318,64 +322,84 @@ public class NMXComs {
 				}	
 				
 				if(sendingCommand){					
-					
-					if(serialDetail)
-						ThreadManagement.message("******************************************************");
-					
-					// Print the command being sent
-					if(serialDetail)					
-						ThreadManagement.message("Command out: " + commandPacket);
 	
 					// Convert hex string to byte array and send to NMX
 					byte[] outCommand = hexStringToByteArray(commandPacket);
 					
-					serial.write(outCommand);
-					
 					// Log the command time
 					long commandTime = System.currentTimeMillis();
-					if(serialDetail)
-						ThreadManagement.message("Time since last command: " + (commandTime-lastCommandTime)  + "ms");
+					final int MIN_TIME = 90;
+					long timeDiff = commandTime - lastCommandTime; 
+					if(timeDiff < MIN_TIME){
+						try{				
+							//System.out.println("Sleeping for " + (MIN_TIME - timeDiff) + " millis");
+							Thread.sleep(MIN_TIME - timeDiff);					
+						} catch (InterruptedException e) {
+							System.out.println("NMX Command thread interrupted!");
+							e.printStackTrace();
+						}
+					}
+					serial.write(outCommand);
 					lastCommandTime = commandTime;
-					
-					if(responseDelay == ResponseTiming.EEPROM || responseDelay == ResponseTiming.LONG_WAIT){
-						// If the the timing has been set an allowable alternate value, don't change it
-					}
-					else if(responseOn){						
-						responseDelay = ResponseTiming.DEFAULT;
-					}
-					else if(!responseOn){
-						//ThreadManagement.message("Not waiting for response");
-						responseDelay = ResponseTiming.NO_RESPONSE;
-					}
-					
-					// Wait for response
-					try {
-						Thread.sleep(responseDelay);
-					} catch (InterruptedException e) {
-						ThreadManagement.message("NMX Command thread interrupted!");
-						e.printStackTrace();
-					}				
-					
-					// Change the response delay back to the default
-					responseDelay = ResponseTiming.DEFAULT;
 										
-					// Retrieve response buffer					
-					int size = serial.available();				
-					int[] inByte = new int[size];
+					// Retrieve response buffer						
+					List<Integer> inBytes = new ArrayList<Integer>();
 					
 					// Clear old response string and populate with chars from buffer
 					response = "";
-					for (int i = 0; i < inByte.length; i++) {
-						inByte[i] = serial.read();
-						String debug = inByte[i] <= 15 ? "0" + Integer.toHexString(inByte[i]) : Integer.toHexString(inByte[i]);
-						response = response + debug;
-					}			
+					boolean waitingForPreamble = true;
+					int index = 0;
+					int dataRemaining = 0;			
+					
+					// Wait for full packet before proceeding
+					long waitStart = System.currentTimeMillis();
+					// Give up if the first byte isn't received before the start timeout,
+					// or the packet isn't finished before the final timeout					
+					final int FINAL_TIMEOUT = 90; 
+					final int DATA_LENGTH_BYTE = 9;
+					while(waitingForPreamble || dataRemaining > 0){
+						if(serial.available() > 0){
+							inBytes.add(serial.read());
+							if(index == DATA_LENGTH_BYTE){
+								/*
+								 *  Make sure the header is at the beginning of the data.
+								 *  If it's not, decrement the index, remove the first byte,
+								 *  then try again. If the previous packet timed out, there's
+								 *  a good chance the last byte will get appended to the beginning
+								 *  of the current packet, so this check accounts for that
+								 */
+								int headerLocation = verifyPacketHeader(inBytes);
+								if(headerLocation != 0){
+									index--;
+									inBytes.remove(0);
+								}
+								else{
+									dataRemaining = inBytes.get(index);
+									waitingForPreamble = false;
+								}
+							}
+							else if(index > DATA_LENGTH_BYTE){
+								dataRemaining--;
+							}
+							index++;
+						}
+						// Check for timeouts
+						long curTime = System.currentTimeMillis();						
+						if(curTime - waitStart > FINAL_TIMEOUT){
+							response = ERROR_STR;
+							break;
+						}
+					}												
+										
+					if(!response.equals(ERROR_STR)){
+						for (int x : inBytes) {					
+							String debug = x <= 15 ? "0" + Integer.toHexString(x) : Integer.toHexString(x);
+							response = response + debug;
+						}			
+					}
 					// Extract the data from the response packet					
 					parseResponse();
-					
-					if(serialDetail)
-						ThreadManagement.message("******************************************************");
-					
+
 					// Cancel the command sending condition 
 					sendingCommand = false;
 					
