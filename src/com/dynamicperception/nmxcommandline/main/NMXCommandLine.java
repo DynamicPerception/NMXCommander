@@ -14,8 +14,6 @@ import com.dynamicperception.nmxcommandline.coms.Serial;
 import com.dynamicperception.nmxcommandline.helpers.Console;
 import com.dynamicperception.nmxcommandline.helpers.Consts;
 import com.dynamicperception.nmxcommandline.models.Command;
-import com.dynamicperception.nmxcommandline.models.Command.Names;
-import com.dynamicperception.nmxcommandline.models.Command.Type;
 import com.dynamicperception.nmxcommandline.models.NMXComs;
 
 public class NMXCommandLine {
@@ -23,7 +21,7 @@ public class NMXCommandLine {
 	private static boolean execute;
 	private static Serial serial;
 	final static String DELIMITER = " ";	
-	private static long lastTime;
+	//private static long lastTime;
 	private static String version = "0.2-beta"; 
 	
 	public static void main(String[] args) {
@@ -268,7 +266,7 @@ public class NMXCommandLine {
 		else{
 			//System.out.println("Last command loaded time elapsed: " + (System.nanoTime() - lastTime));
 			runCommand(args);
-			lastTime = System.nanoTime();
+			//lastTime = System.nanoTime();
 		}
 	}
 	
