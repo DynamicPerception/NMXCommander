@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.dynamicperception.nmxcommandline.coms.Serial;
+import com.dynamicperception.nmxcommandline.helpers.Consts;
 
 public class NMXComs {
 	
@@ -236,7 +237,7 @@ public class NMXComs {
 			System.out.println("Response before parsing: " + response);
 		
 		if(!responseOn){
-			responseVal = ERROR;
+			responseVal =  Consts.ERROR;
 			return;
 		}
 		
@@ -244,14 +245,16 @@ public class NMXComs {
 		if(response.equals("0000000000ff00000100"))
 			return;
 		if(response.equals("")){
+
+		if(serialDetail)
 			System.out.println("Empty response!");
-			responseVal = ERROR;
+			responseVal = Consts.ERROR;
 			emptyResponseCount++;
 			return;
 		}
 		if(response.equals(ERROR_STR)){
 			System.out.println("~~~RESPONSE TIMEOUT ERROR~~~");
-			responseVal = ERROR;
+			responseVal =  Consts.ERROR;
 			return;
 		}
 		emptyResponseCount = 0;

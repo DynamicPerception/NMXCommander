@@ -3,7 +3,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.dynamicperception.nmxcommandline.helpers.Consts;
+import com.dynamicperception.nmxcommandline.models.Command;
 import com.dynamicperception.nmxcommandline.models.Command.Names.Motor;
+
 
 public class Command {
 	
@@ -26,6 +29,7 @@ public class Command {
 	private int dataLength;
 	private Class<?> returnType;	
 	private HelpCommand helpCommand;
+	private ExecuteStructure execute;
 	
 	public void help(){
 		helpCommand.helpCommand();
@@ -35,8 +39,137 @@ public class Command {
 		this.helpCommand = helpCommand;
 	}
 	
+	public void setExecuteStructure(ExecuteStructure execute){
+		this.execute = execute;
+	}
+	
 	public static interface HelpCommand{
 		public void helpCommand();
+	}
+	
+	public class DefaultExecute implements ExecuteStructure{
+		
+		Command thisCommand;
+		
+		public DefaultExecute(Command thisCommand){
+			this.thisCommand = thisCommand;
+		}
+		
+		public <T>T executeThis(){
+			if(thisCommand.type == Command.Type.MOTOR){
+				System.out.println("This is a motor command; the motor number must be specified to execute");			
+				thisCommand.printInfo();
+				throw new UnsupportedOperationException();
+			}
+			else{
+				return executeThis(thisCommand.subaddr, "0", false);			
+			}
+		}
+		
+		public <T>T executeThis(String dataOrMotor){
+			if(thisCommand.type == Command.Type.MOTOR){
+				int motor = Integer.parseInt(dataOrMotor);
+				if(motor < 0 || motor > Consts.MOTOR_COUNT){
+					System.out.println("Invalid motor number");
+					thisCommand.printInfo();
+					throw new UnsupportedOperationException();				
+				}
+				int tempSubaddr = motor + 1;
+				return executeThis(tempSubaddr, "0", false);
+			}
+			else{
+				return executeThis(thisCommand.subaddr, dataOrMotor, true);
+			}
+		}
+		
+		public <T>T executeThis(String motor, String data){
+			if(thisCommand.type == Command.Type.MOTOR){
+				int motorNum = Integer.parseInt(motor);
+				if(motorNum < 0 || motorNum > Consts.MOTOR_COUNT){
+					System.out.println("Invalid motor number");
+					thisCommand.printInfo();
+					throw new UnsupportedOperationException();				
+				}
+				int tempSubaddr = motorNum + 1;
+				return executeThis(tempSubaddr, data, true);
+			}	
+			else{
+				System.out.println("This is a non-motor command; a motor number may not be specified");			
+				thisCommand.printInfo();
+				throw new UnsupportedOperationException();				
+			} 
+		}
+		
+		@SuppressWarnings("unchecked")
+		private <T>T executeThis(int subAddr, String dataStr, boolean hasData){
+
+		// Notify if data is attached to a command that does not take additional data
+		if(dataLength == 0 && hasData){			
+			System.out.println("This command does not send additional data");			
+			thisCommand.printInfo();
+			throw new UnsupportedOperationException();
+		}
+
+		// Parse the data, if necessary
+		int data = 0;		
+		if(hasData){			
+			
+			if(dataType == Float.class){
+				data = Float.floatToIntBits(Float.parseFloat(dataStr));				
+			}
+			else{
+				data = (int) Math.round(Float.parseFloat(dataStr));				
+			}
+		}		
+			
+		// Send the command to the NMX
+		if(hasData){			
+			NMXComs.cmd(addr, subAddr, thisCommand.command, thisCommand.dataLength, data);
+		}
+		else{
+			NMXComs.cmd(addr, subAddr, thisCommand.command);			
+		}
+		
+		// Wait for the NMX to clear
+		waitForNMX();	
+					
+		// Do any post command action or manipulation of the return value
+		int response = 0;
+		
+		// Don't fetch a response if none is expected
+		if(returnType != Void.class){
+			response = NMXComs.getResponseVal();
+		}
+
+		// Cast the return value to the proper response type
+		T ret = null;
+		if(returnType == Integer.class){
+			ret = (T) returnType.cast(response);
+		}
+		else if(returnType == Float.class){			
+			ret = (T) returnType.cast((float) response / Consts.FLOAT_CONVERSION);
+		}
+		else if(returnType == Boolean.class){
+			ret = (T) returnType.cast(response == 0 ? false : true);			
+		}
+		// Void return type
+		else{			
+			ret = (T) Void.class.cast(null);
+		}
+		
+		// Print debug if necessary
+		if(debug){
+			System.out.println("Command: " + thisCommand.name);
+		}
+		if(ret != null)
+			System.out.println(ret);
+		else
+			System.out.println("OK!");
+		
+		// Return the value
+		return ret;
+	}
+	
 	}
 	
 	/**
@@ -169,7 +302,6 @@ public class Command {
 			public static final String SET_PROG_DECEL	= "m.setProgramDecel";
 			public static final String SET_LEAD_OUT		= "m.setLeadOut";
 			public static final String AUTO_SET_MS		= "m.autoSetMS";
-			
 			public static final String SET_CUR_POS		= "m.setCurPos";
 			
 			public static final String SEND_HOME 		= "m.sendHome";
@@ -186,6 +318,7 @@ public class Command {
 			public static final String SET_UNITS		= "m.setUnits";
 			public static final String SET_GBOX_RATIO	= "m.setGboxRatio";
 			public static final String SET_PLAT_RATIO	= "m.setPlatRatio";
+			public static final String MOVE_AT_VEL		= "m.moveAtVel";
 			
 			// Queries
 			public static final String IS_RUNNING 		= "m.isRunning";
@@ -353,6 +486,7 @@ public class Command {
 	}	
 	
 	private void init(Command.Type type, int command, Class<?> returnType, String name, Class<?> dataType){
+		this.execute = new DefaultExecute(this);
 		this.helpCommand = null;
 		this.name = name;
 		this.type = type;
@@ -527,8 +661,8 @@ public class Command {
 		generalList.add(new Command(Command.Type.GENERAL, 132, Boolean.class, Names.General.GET_LOAD_START_STOP));
 		generalList.add(new Command(Command.Type.GENERAL, 133, Boolean.class, Names.General.GET_LOAD_END));
 		generalList.add(new Command(Command.Type.GENERAL, 140, Integer.class, Names.General.GET_ADV_RUN_STATUS));
-		generalList.add(new Command(Command.Type.GENERAL, 150, Boolean.class, Names.General.IS_GRAFFIK));	
-		
+		generalList.add(new Command(Command.Type.GENERAL, 150, Boolean.class, Names.General.IS_GRAFFIK));
+		generalList.add(new Command(Command.Type.GENERAL, 200, Integer.class, Names.General.GET_FREE_MEMORY));
 		
 		Command setDebug = new Command(Command.Type.GENERAL, 254, Names.General.SET_DEBUG, Byte.class);		
 		setDebug.setHelpCommand(new DebugHelp());
@@ -568,12 +702,53 @@ public class Command {
 		motorList.add(new Command(Command.Type.MOTOR, 29, Names.Motor.SET_START_HERE));
 		motorList.add(new Command(Command.Type.MOTOR, 30, Names.Motor.SET_STOP_HERE, Byte.class));	
 		motorList.add(new Command(Command.Type.MOTOR, 31, Names.Motor.SEND_TO, Long.class));
+
 		motorList.add(new Command(Command.Type.MOTOR, 32, Names.Motor.SET_CUR_POS, Long.class));
 		motorList.add(new Command(Command.Type.MOTOR, 33, Names.Motor.SET_END, Long.class));
 		motorList.add(new Command(Command.Type.MOTOR, 40, Names.Motor.SET_UNITS, Integer.class));
 		motorList.add(new Command(Command.Type.MOTOR, 41, Names.Motor.SET_GBOX_RATIO, Float.class));
 		motorList.add(new Command(Command.Type.MOTOR, 42, Names.Motor.SET_PLAT_RATIO, Float.class));
-				
+
+		Command moveAtVel = new Command(Command.Type.MOTOR, 1000, Names.Motor.MOVE_AT_VEL, Float.class);		
+		class MoveAtVelExecute implements ExecuteStructure{
+			Command thisCommand;
+			
+			public MoveAtVelExecute(Command thisCommand){
+				this.thisCommand = thisCommand;
+			}
+			
+			@Override
+			public <T> T executeThis() {
+				System.out.println("Invalid command structure");
+				thisCommand.help();
+				return null;
+			}
+
+			@Override
+			public <T> T executeThis(String dataOrMotor) {
+				System.out.println("Invalid command structure");
+				thisCommand.help();
+				return null;
+			}
+
+			@Override
+			public <T> T executeThis(String motor, String data) {
+				Command.execute(Names.General.SET_GRAFFIK, true);
+				Command.execute(Names.General.SET_JOYSTICK, true);
+				Command.execute(Names.Motor.SET_SPEED, motor, data);
+				return null;
+			}
+			
+		}
+		class MoveAtVelHelp implements HelpCommand{
+			@Override
+			public void helpCommand() {				
+				System.out.println("Proper syntax -- \"m.moveAtVel <MOTOR #> <VELOCITY (STEPS/SEC)>\"");				
+			}			
+		}
+		moveAtVel.setHelpCommand(new MoveAtVelHelp());
+		moveAtVel.setExecuteStructure(new MoveAtVelExecute(moveAtVel));
+		motorList.add(moveAtVel);
 		
 		// Queries
 		motorList.add(new Command(Command.Type.MOTOR, 100, Boolean.class, Names.Motor.GET_ENABLE));
@@ -604,7 +779,6 @@ public class Command {
 		 */
 		motorList.add(new Command(Command.Type.MOTOR, 122, Float.class, Names.Motor.GET_GBOX_RATIO));
 		motorList.add(new Command(Command.Type.MOTOR, 123, Float.class, Names.Motor.GET_PLAT_RATIO));
-	
 		
 		//******** Camera Commands ********//
 		
@@ -620,7 +794,7 @@ public class Command {
 		cameraList.add(new Command(Command.Type.CAMERA, 10, Names.Camera.SET_INTERVAL, Long.class));
 		cameraList.add(new Command(Command.Type.CAMERA, 11, Names.Camera.SET_TEST_MODE, Byte.class));
 		cameraList.add(new Command(Command.Type.CAMERA, 12, Names.Camera.SET_KEEPALIVE, Byte.class));
-		cameraList.add(new Command(Command.Type.CAMERA, 12, Names.Camera.SET_INTERVALOMETER_MODE, Byte.class));
+		cameraList.add(new Command(Command.Type.CAMERA, 13, Names.Camera.SET_INTERVALOMETER_MODE, Byte.class));
 		
 		// Queries		
 		cameraList.add(new Command(Command.Type.CAMERA, 100, Integer.class, Names.Camera.IS_ENABLED));
@@ -637,7 +811,6 @@ public class Command {
 		cameraList.add(new Command(Command.Type.CAMERA, 111, Integer.class, Names.Camera.GET_KEEPALIVE));
 		cameraList.add(new Command(Command.Type.CAMERA, 113, Integer.class, Names.Camera.GET_INTERVALOMETER_MODE));
 		cameraList.add(new Command(Command.Type.CAMERA, 113, Integer.class, Names.Camera.GET_AVOID_OFFSET));
-	
 		
 		//******** Key Frame Commands ********//
 		
@@ -806,39 +979,39 @@ public class Command {
 	}
 	
 	public static <T>T execute(String name){
-		return Command.get(name).executeThis();
+		return Command.get(name).execute.executeThis();
 	}
 	
 	public static <T>T execute(String name, String dataOrMotor){
-		return Command.get(name).executeThis(dataOrMotor);
+		return Command.get(name).execute.executeThis(dataOrMotor);
 	}
 	
 	public static <T>T execute(String name, String motor, String data){
-		return Command.get(name).executeThis(motor, data);
+		return Command.get(name).execute.executeThis(motor, data);
 	}
 	
 	public static <T>T execute(String name, boolean dataOrMotor){
-		return Command.get(name).executeThis(dataOrMotor == true ? "1" : "0");
+		return Command.get(name).execute.executeThis(dataOrMotor == true ? "1" : "0");
 	}
 	
 	public static <T>T execute(String name, int motor, boolean data){
-		return Command.get(name).executeThis(Integer.toString(motor), data == true ? "1" : "0");
+		return Command.get(name).execute.executeThis(Integer.toString(motor), data == true ? "1" : "0");
 	}
 	
 	public static <T>T execute(String name, int dataOrMotor){
-		return Command.get(name).executeThis(Integer.toString(dataOrMotor));
+		return Command.get(name).execute.executeThis(Integer.toString(dataOrMotor));
 	}
 	
 	public static <T>T execute(String name, int motor, int data){
-		return Command.get(name).executeThis(Integer.toString(motor), Integer.toString(data));
+		return Command.get(name).execute.executeThis(Integer.toString(motor), Integer.toString(data));
 	}
 	
 	public static <T>T execute(String name, float dataOrMotor){
-		return Command.get(name).executeThis(Float.toString(dataOrMotor));
+		return Command.get(name).execute.executeThis(Float.toString(dataOrMotor));
 	}
 	
 	public static <T>T execute(String name, int motor, float data){
-		return Command.get(name).executeThis(Integer.toString(motor), Float.toString(data));
+		return Command.get(name).execute.executeThis(Integer.toString(motor), Float.toString(data));
 	}
 	
 	
@@ -879,7 +1052,7 @@ public class Command {
 		System.out.println("Return type: " + this.returnType.getName());		
 	}
 	
-	private <T>T executeThis(){
+	public <T>T executeThis(){
 		if(this.type == Command.Type.MOTOR){
 			System.out.println("This is a motor command; the motor number must be specified to execute");			
 			this.printInfo();
@@ -890,7 +1063,7 @@ public class Command {
 		}
 	}
 	
-	private <T>T executeThis(String dataOrMotor){
+	public <T>T executeThis(String dataOrMotor){
 		if(this.type == Command.Type.MOTOR){
 			int motor = Integer.parseInt(dataOrMotor);
 			if(motor < 0 || motor > MOTOR_COUNT){
@@ -906,7 +1079,7 @@ public class Command {
 		}
 	}
 	
-	private <T>T executeThis(String motor, String data){
+	public <T>T executeThis(String motor, String data){
 		if(this.type == Command.Type.MOTOR){
 			int motorNum = Integer.parseInt(motor);
 			if(motorNum < 0 || motorNum > MOTOR_COUNT){
@@ -1001,6 +1174,8 @@ public class Command {
 		// Return the value
 		return ret;
 	}
+	
+
 	
 	private static void waitForNMX(){
 		// If a command is currently being sent, wait

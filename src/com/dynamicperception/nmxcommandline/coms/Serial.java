@@ -94,10 +94,10 @@ public class Serial implements SerialPortEventListener {
 		System.out.println();
 		if (port_list.size() > 0) {
 			System.out
-					.println("the following serial ports have been detected:");
+					.println("The following serial ports have been detected:");
 		} else {
 			System.out
-					.println("sorry, no serial ports were found on your computer\n");
+					.println("Sorry, no serial ports were found on your computer\n");
 		}
 		for (int i = 0; i < port_list.size(); ++i) {
 			System.out.println("    " + Integer.toString(i + 1) + ":  "
@@ -117,6 +117,10 @@ public class Serial implements SerialPortEventListener {
   public void openPort(int portID, int baudRate) {
 	  String portName = port_list.elementAt(portID);
 	  openPort(portName, baudRate);
+  }
+  
+  public void openPort(String portName) {
+	  openPort(portName, defaultBaudRate, 'N', 8, 1);
   }
   
   public void openPort(String portName, int baudRate) {
