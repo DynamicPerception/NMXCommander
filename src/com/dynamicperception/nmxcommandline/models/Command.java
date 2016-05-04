@@ -14,7 +14,7 @@ public class Command {
 	private final static int MOTOR_COUNT = 3;
 	private static int addr = 3;
 	private static int currentControllerNum = 0;
-	private static boolean debug = true;
+	private static boolean commandDetail = false;
 	private static List<Command> generalList = new ArrayList<Command>();
 	private static List<Command> motorList = new ArrayList<Command>();
 	private static List<Command> cameraList = new ArrayList<Command>();
@@ -157,10 +157,6 @@ public class Command {
 			ret = (T) Void.class.cast(null);
 		}
 		
-		// Print debug if necessary
-		if(debug){
-			System.out.println("Command: " + thisCommand.name);
-		}
 		if(ret != null)
 			System.out.println(ret);
 		else
@@ -966,12 +962,20 @@ public class Command {
 		throw new UnsupportedOperationException();		
 	}
 	
-	public static void setDebug(boolean debug){
-		Command.debug = debug;
+	public static void setCommandDetail(boolean enabled){
+		Command.commandDetail = enabled;
+	}
+	
+	public static boolean getCommandDetail(){
+		return Command.commandDetail;
 	}
 	
 	public static void setAddr(int addr){
 		Command.addr = addr;
+	}
+	
+	public static int getAddr(){
+		return Command.addr;
 	}
 	
 	public static int getControllerNum(){
@@ -1117,18 +1121,20 @@ public class Command {
 				data = (int) Math.round(Float.parseFloat(dataStr));				
 			}
 		}	
-		
-		// Print debug if necessary
-		if(debug){
-			System.out.println("Command: " + this.name + " Input data: " + dataStr);
-		}
 			
+		String commandPacket = "";
+		
 		// Send the command to the NMX
 		if(hasData){			
-			NMXComs.cmd(addr, subAddr, this.command, this.dataLength, data);
+			commandPacket = NMXComs.cmd(addr, subAddr, this.command, this.dataLength, data);
 		}
 		else{
-			NMXComs.cmd(addr, subAddr, this.command);			
+			commandPacket = NMXComs.cmd(addr, subAddr, this.command);			
+		}
+		
+		// Print debug if necessary
+		if(commandDetail){
+			System.out.println("Command: " + commandPacket + " Output data: " + dataStr);
 		}
 		
 		// Wait for the NMX to clear
