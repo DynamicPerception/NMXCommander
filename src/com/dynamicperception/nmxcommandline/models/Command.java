@@ -682,14 +682,14 @@ public class Command {
 			
 			@Override
 			public <T> T executeThis() {
-				System.out.println("Invalid command stucture");
+				System.out.println("Invalid command structure");
 				thisCommand.help();
 				return null;
 			}
 
 			@Override
 			public <T> T executeThis(String dataOrMotor) {
-				System.out.println("Invalid command stucture");
+				System.out.println("Invalid command structure");
 				thisCommand.help();
 				return null;
 			}
