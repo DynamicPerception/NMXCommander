@@ -345,6 +345,47 @@ public class NMXCommandLine {
 			return;			
 		}		
 		// Normal Command
+		else if(args.get(0).equals("packet")){
+			if(args.size() < 6 || args.size() > 7){
+				Console.pln("Incorrect number of arguments");
+				Console.pln("Example -> \"packet [ADDR] [SUBADDR] [CMD] [LENGTH] [DATA (optional)] [RESPONSE]\"");
+				Console.pln(
+						"[ADDR], [SUBADDR], [CMD], and [LENGTH] are each a single byte with values\n"
+						+ "from 0-255. If [LENGTH] != 0, [DATA] may be a byte, int, long, or float,\n"
+						+ "depending on the command. If [LENGTH] == 0, do not include the [DATA]\n"
+						+ "parameter. [RESPONSE] is a boolean value.");
+			}
+			else{
+				List<Integer> intArgs = new ArrayList<>();
+				for(int i = 1; i < args.size(); i++){
+					String arg = args.get(i);
+					intArgs.add(Integer.parseInt(arg));
+				}
+				boolean response = intArgs.get(intArgs.size()-1) == 0 ? false : true;				
+				try {
+					// Enable printing of the raw response...
+					boolean oldDetail = NMXComs.getSerialDetail();
+					NMXComs.setSerialDetail(true);
+					if(intArgs.size() == 5){						
+						NMXComs.cmd(intArgs.get(0), intArgs.get(1), intArgs.get(2), intArgs.get(3), 0, response);
+					}
+					else{
+						NMXComs.cmd(intArgs.get(0), intArgs.get(1), intArgs.get(2), intArgs.get(3), intArgs.get(4), response);
+					}
+					try{					
+						Thread.sleep(100);					
+					} catch (InterruptedException e) {						
+						e.printStackTrace();
+					}
+					// ...but revert when done with the command
+					NMXComs.setSerialDetail(oldDetail);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+						
+				
+			}
+		}
 		else{
 			//System.out.println("Last command loaded time elapsed: " + (System.nanoTime() - lastTime));
 			runCommand(args);
