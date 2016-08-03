@@ -238,7 +238,7 @@ public class Command {
 			public static final String IS_EXPOSING							= "g.isExposing";
 			public static final String IS_TIMING_MASTER 					= "g.isTimingMaster";
 			public static final String GET_NAME								= "g.getName";
-			public static final String GET_MAX_STEP_RATE 					= "g.getMaxStepRate";
+			public static final String GET_MAX_SPEED 						= "g.getMaxSpeed";
 			public static final String GET_VOLTAGE 							= "g.getVoltage";
 			public static final String GET_CURRENT 							= "g.getCurrent";
 			public static final String GET_ALT_INPUT_EDGE					= "g.getAltInputEdge";
@@ -330,7 +330,7 @@ public class Command {
 			public static final String GET_TRAVEL		= "m.getTravel";
 			public static final String GET_SLEEP 		= "m.getSleep";
 			public static final String GET_DIR 			= "m.getDir";
-			public static final String GET_MAX_STEP_RATE = "m.getMaxStepRate";		
+			public static final String GET_MAX_SPEED = "m.getMaxStepRate";		
 			public static final String GET_EASING		= "m.getEasing";
 			public static final String GET_LEAD_IN		= "m.getLeadIn";
 			public static final String GET_PROG_ACCEL	= "m.getProgramAccel";
@@ -628,7 +628,7 @@ public class Command {
 		generalList.add(new Command(Command.Type.GENERAL, 103, Boolean.class, Names.General.IS_EXPOSING));
 		generalList.add(new Command(Command.Type.GENERAL, 104, Boolean.class, Names.General.IS_TIMING_MASTER));
 		generalList.add(new Command(Command.Type.GENERAL, 105, String.class, Names.General.GET_NAME));
-		generalList.add(new Command(Command.Type.GENERAL, 106, Integer.class, Names.General.GET_MAX_STEP_RATE));
+		generalList.add(new Command(Command.Type.GENERAL, 106, Integer.class, Names.General.GET_MAX_SPEED));
 		generalList.add(new Command(Command.Type.GENERAL, 107, Float.class, Names.General.GET_VOLTAGE));
 		generalList.add(new Command(Command.Type.GENERAL, 108, Float.class, Names.General.GET_CURRENT));
 		generalList.add(new Command(Command.Type.GENERAL, 109, Integer.class, Names.General.GET_ALT_INPUT_EDGE));
@@ -751,7 +751,7 @@ public class Command {
 		motorList.add(new Command(Command.Type.MOTOR, 101, Integer.class, Names.Motor.GET_BACKLASH));
 		motorList.add(new Command(Command.Type.MOTOR, 102, Integer.class, Names.Motor.GET_MS));
 		motorList.add(new Command(Command.Type.MOTOR, 103, Integer.class, Names.Motor.GET_DIR));
-		motorList.add(new Command(Command.Type.MOTOR, 104, Integer.class, Names.Motor.GET_MAX_STEP_RATE));
+		motorList.add(new Command(Command.Type.MOTOR, 104, Integer.class, Names.Motor.GET_MAX_SPEED));
 		motorList.add(new Command(Command.Type.MOTOR, 105, Integer.class, Names.Motor.GET_END));	
 		motorList.add(new Command(Command.Type.MOTOR, 106, Integer.class, Names.Motor.GET_POS));		
 		motorList.add(new Command(Command.Type.MOTOR, 107, Boolean.class, Names.Motor.IS_RUNNING));
