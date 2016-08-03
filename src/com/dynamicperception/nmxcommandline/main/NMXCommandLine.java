@@ -216,161 +216,249 @@ public class NMXCommandLine {
         } else if (args.get(0).equals("help")) {
             printHelp();
         } else if (args.get(0).equals("commandDetail")) {
-            try {
-                boolean enabled = args.get(1).equals("0") ? false : true;
-                Command.setCommandDetail(enabled);
-            } catch (IndexOutOfBoundsException e) {
-                System.out.println("Command detail enabled? : " + Command.getCommandDetail());
-            }
+            commandDetail(args);
         } else if (args.get(0).equals("serialDetail")) {
-            try {
-                boolean enabled = args.get(1).equals("0") ? false : true;
-                NMXComs.setSerialDetail(enabled);
-            } catch (IndexOutOfBoundsException e) {
-                System.out.println("Serial detail enabled? : " + NMXComs.getSerialDetail());
-            }
+            serialDetail(args);
         } else if (args.get(0).equals("outputAddress")) {
-            try {
-                int addr = Integer.parseInt(args.get(1));
-                Command.setAddr(addr);
-            } catch (IndexOutOfBoundsException e) {
-                System.out.println("Current command address: " + Command.getAddr());
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid address. Must be an integer.");
-            }
-
+            outputAddress(args);
         } else if (args.get(0).equals("responseTimeout")) {
-            try {
-                int timeout = Integer.parseInt(args.get(1));
-                NMXComs.setResponseTimeout(timeout);
-            } catch (IndexOutOfBoundsException e) {
-                System.out.println("Current timout in milliseconds: " + NMXComs.getResponseTimeout());
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid address. Must be an integer.");
-            }
-
+            responseTimeout(args);
         }
         // Run command list from file
         else if (args.get(0).equals("runMacro")) {
-            try {
-                if (args.size() == 1) {
-                    Console.pln("\nrunMacro syntax -- \"runMacro [PATH]\"");
-                    Console.pln("Example -> \"runMacro c:\\NMXmacro.txt\"\n");
-                    Console.pln("The text file should have one command on each line with the following syntax:\n\n"
-                            + "\"[DELAY TIME] [COMMAND TYPE].[COMMAND NAME] [DATA or MOTOR # (if required)] [MOTOR DATA (if required)]\"\n\n"
-                            + "The following example enables the camera, sets the focus time to 600ms, trigger time to 100ms, sets home\n"
-                            + "for each of the motors (e.g. sets current position to 0), immediately takes an exposure, commands the motors to\n"
-                            + "a new position, waits 5000ms, takes another exposure, waits 1000ms, commands the motors back to their original\n"
-                            + "positions, waits 5000ms, then takes a final exposure:\n\n" + "0 c.setEnable 1\n"
-                            + "0 c.setFocus 600 \n" + "0 c.setTrigger 100 \n" + "0 m.setHome 0\n" + "0 m.setHome 1\n"
-                            + "0 m.setHome 2\n" + "0 c.expose\n" + "0 m.sendTo 0 15000\n" + "0 m.sendTo 1 2560\n"
-                            + "0 m.sendTo 2 -5000\n" + "5000 c.expose\n" + "1000 m.sendTo 0 0\n" + "0 m.sendTo 1 0\n"
-                            + "0 m.sendTo 2 0\n" + "5000 c.expose\n\n"
-                            + "Lines in the macro file may be commented out by starting a line with \"//\"");
-                } else if (args.size() > 1) {
-                    runMacro(Paths.get(args.get(1)));
-                }
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            runMacro(args);
             return;
         }
         // Replay a Graffik command log
         else if (args.get(0).equals("replayLog")) {
-            try {
-                // If there is a second argument, use it as the log path
-                if (args.size() > 1)
-                    runCsvCommandFile(Paths.get(args.get(1)));
-                // Otherwise, use the default path
-                else
-                    runCsvCommandFile();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            replayLog(args);
             return;
         }
-        // Help request
+        // List request
         else if (args.get(0).toLowerCase().equals("list")) {
-            if (args.size() < 2) {
-                Console.pln("List syntax -- \"list [COMMAND TYPE]\"");
-                Console.pln("Example -> \"list c\" prints the list of valid camera commands");
-                return;
-            }
-            Command.printList(Command.getType(args.get(1)));
+            listRequest(args);
             return;
         }
         // Repeat the following command n times. (e.g. "repeat 2 m.getMS 0")
         else if (args.get(0).equals("repeat")) {
-            try {
-                int count = Integer.parseInt(args.get(1));
-                for (int i = 0; i < 2; i++) {
-                    args.remove(0);
-                }
-                for (int i = 0; i < count; i++) {
-                    parseCommand(args);
-                }
-            } catch (IndexOutOfBoundsException | NumberFormatException e) {
-                Console.pln("Invalid syntax. Try \"repeat [#] [command]\"");
-            }
+            repeatCommand(args);
             return;
         }
         // Find command name
         else if (args.get(0).equals("find")) {
-            if (args.size() < 2) {
-                Console.pln("Find syntax -- \"find [COMMAND TYPE].[SEARCH TERM]\"");
-                Console.pln("Example -> \"find m.speed\" prints the following:");
-                List<String> exampleArgs = Arrays.asList("find", "m.speed");
-                findCommand(exampleArgs);
-            } else {
-                findCommand(args);
-            }
+            findCommand(args);
             return;
         }
-        // Normal Command
+        // Manual packet command
         else if (args.get(0).equals("packet")) {
-            if (args.size() < 6 || args.size() > 7) {
-                Console.pln("Incorrect number of arguments");
-                Console.pln("Example -> \"packet [ADDR] [SUBADDR] [CMD] [LENGTH] [DATA (optional)] [RESPONSE]\"");
-                Console.pln("[ADDR], [SUBADDR], [CMD], and [LENGTH] are each a single byte with values\n"
-                        + "from 0-255. If [LENGTH] != 0, [DATA] may be a byte, int, long, or float,\n"
-                        + "depending on the command. If [LENGTH] == 0, do not include the [DATA]\n"
-                        + "parameter. [RESPONSE] is a boolean value.");
-            } else {
-                List<Integer> intArgs = new ArrayList<>();
-                for (int i = 1; i < args.size(); i++) {
-                    String arg = args.get(i);
-                    intArgs.add(Integer.parseInt(arg));
+            manualPacketCommand(args);
+        }
+        // Normal Command
+        else {
+            runCommand(args);
+        }
+    }
+
+    /**
+     * Sets or prints the current command detail state. When enabled, the
+     * command detail option is enabled, additional information about the
+     * command, including specific data sent to the NMX will be printed when the
+     * command is executed.
+     * 
+     * @param args
+     *            A List of String arguments that comprise the command
+     */
+    static void commandDetail(List<String> args) {
+        // If a second argument is present, set the detail state, otherwise
+        // report the current state
+        try {
+            boolean enabled = args.get(1).equals("0") ? false : true;
+            Command.setCommandDetail(enabled);
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("Command detail enabled? : " + Command.getCommandDetail());
+        }
+    }
+
+    /**
+     * Sets or prints the current serial detail state. When enabled, the serial
+     * detail option is enabled, the NMX's raw serial response to a command will
+     * be printed. This may be helpful for debugging certain unexpected
+     * behaviors in the NMX.
+     * 
+     * @param args
+     *            A List of String arguments that comprise the command
+     * 
+     */
+    static void serialDetail(List<String> args) {
+        // If a second argument is present, set the detail state, otherwise
+        // report the current state
+        try {
+            boolean enabled = args.get(1).equals("0") ? false : true;
+            NMXComs.setSerialDetail(enabled);
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("Serial detail enabled? : " + NMXComs.getSerialDetail());
+        }
+    }
+
+    /**
+     * Sets or prints the current NMX address that will be set in the outgoing
+     * packet.
+     * 
+     * @param args
+     *            A List of String arguments that comprise the command
+     * 
+     */
+    static void outputAddress(List<String> args) {
+        try {
+            // If there's a second argument, then set the address
+            int addr = Integer.parseInt(args.get(1));
+            Command.setAddr(addr);
+            // Otherwise print the current address
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("Current command address: " + Command.getAddr());
+            // Handle malformed input
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid address. Must be an integer.");
+        }
+    }
+
+    /**
+     * Sets or prints the response timeout in milliseconds. Setting shorter
+     * timeouts increases the command throughput by more quickly recognizing a
+     * bad response and moving on from it, however setting it too short will
+     * cause valid responses to be rejected. Conversely, setting too long of a
+     * timeout will cause the communication between NMX Commander and the NMX to
+     * be sluggish. packet.
+     * 
+     * @param args
+     *            A List of String arguments that comprise the command
+     * 
+     */
+    static void responseTimeout(List<String> args) {
+        try {
+            int timeout = Integer.parseInt(args.get(1));
+            NMXComs.setResponseTimeout(timeout);
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("Current timout in milliseconds: " + NMXComs.getResponseTimeout());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid address. Must be an integer.");
+        }
+    }
+
+    /**
+     * Parses a request to replay a recorded Graffik session. This is useful
+     * primarily for debugging issues found during a Graffik session, since the
+     * exact timing and sequence of commands can be replayed without running
+     * through the Graffik interface.
+     * 
+     * @param args
+     *            A List of String arguments that comprise the command. Argument
+     *            in position 1 must be a path that points to a .csv file
+     *            generated by Graffik in it's recording mode.
+     * 
+     */
+    static void replayLog(List<String> args) {
+        try {
+            // If there is a second argument, use it as the log path
+            if (args.size() > 1)
+                runCsvCommandFile(Paths.get(args.get(1)));
+            // Otherwise, use the default path
+            else
+                runCsvCommandFile();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * This method prints information about using the list command or a list of
+     * all valid commands for a specific command subtype.
+     * 
+     * @param args
+     *            A List of String arguments that comprise the command.
+     */
+    static void listRequest(List<String> args) {
+        // If there aren't enough arguments, print list instructions
+        if (args.size() < 2) {
+            Console.pln("List syntax -- \"list [COMMAND TYPE]\"");
+            Console.pln("Example -> \"list c\" prints the list of valid camera commands");
+            return;
+        }
+        // Otherwise
+        Command.printList(Command.getType(args.get(1)));
+    }
+
+    /**
+     * Repeats a particular command n times, where n is an integer in argument
+     * position 1 and the command is a normal command occupying however many
+     * subsequent argument positions are required. On bad input, instructions
+     * for using the command are printed.
+     * 
+     * @param args
+     *            A List of String arguments that comprise the command.
+     */
+    static void repeatCommand(List<String> args) {
+        try {
+            int count = Integer.parseInt(args.get(1));
+            for (int i = 0; i < 2; i++) {
+                args.remove(0);
+            }
+            for (int i = 0; i < count; i++) {
+                parseCommand(args);
+            }
+        }
+        // On bad input, print proper repeat command syntax
+        catch (IndexOutOfBoundsException | NumberFormatException e) {
+            Console.pln("Invalid syntax. Try \"repeat [#] [command]\"");
+        }
+    }
+
+    /**
+     * Executes a command directly from a manually constructed packet, bypassing
+     * the Command class structure. This is useful for debugging and for testing
+     * new commands that have not yet been added to the Command class name
+     * structure.
+     * 
+     * @param args
+     *            A List of String arguments that comprise the command.
+     */
+    static void manualPacketCommand(List<String> args) {
+        if (args.size() < 6 || args.size() > 7) {
+            Console.pln("Incorrect number of arguments");
+            Console.pln("Example -> \"packet [ADDR] [SUBADDR] [CMD] [LENGTH] [DATA (optional)] [RESPONSE]\"");
+            Console.pln("[ADDR], [SUBADDR], [CMD], and [LENGTH] are each a single byte with values\n"
+                    + "from 0-255. If [LENGTH] != 0, [DATA] may be a byte, int, long, or float,\n"
+                    + "depending on the command. If [LENGTH] == 0, do not include the [DATA]\n"
+                    + "parameter. [RESPONSE] is a boolean value.");
+        } else {
+            List<Integer> intArgs = new ArrayList<>();
+            for (int i = 1; i < args.size(); i++) {
+                String arg = args.get(i);
+                intArgs.add(Integer.parseInt(arg));
+            }
+            boolean response = intArgs.get(intArgs.size() - 1) == 0 ? false : true;
+            try {
+                // Enable printing of the raw response...
+                boolean oldDetail = NMXComs.getSerialDetail();
+                NMXComs.setSerialDetail(true);
+                if (intArgs.size() == 5) {
+                    NMXComs.cmd(intArgs.get(0), intArgs.get(1), intArgs.get(2), intArgs.get(3), 0, response);
+                } else {
+                    NMXComs.cmd(intArgs.get(0), intArgs.get(1), intArgs.get(2), intArgs.get(3), intArgs.get(4),
+                            response);
                 }
-                boolean response = intArgs.get(intArgs.size() - 1) == 0 ? false : true;
                 try {
-                    // Enable printing of the raw response...
-                    boolean oldDetail = NMXComs.getSerialDetail();
-                    NMXComs.setSerialDetail(true);
-                    if (intArgs.size() == 5) {
-                        NMXComs.cmd(intArgs.get(0), intArgs.get(1), intArgs.get(2), intArgs.get(3), 0, response);
-                    } else {
-                        NMXComs.cmd(intArgs.get(0), intArgs.get(1), intArgs.get(2), intArgs.get(3), intArgs.get(4),
-                                response);
-                    }
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    // ...but revert when done with the command
-                    NMXComs.setSerialDetail(oldDetail);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
+                // ...but revert when done with the command
+                NMXComs.setSerialDetail(oldDetail);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        } else {
-            // System.out.println("Last command loaded time elapsed: " +
-            // (System.nanoTime() - lastTime));
-            runCommand(args);
-            // lastTime = System.nanoTime();
+
         }
     }
 
@@ -424,7 +512,10 @@ public class NMXCommandLine {
      */
     private static void findCommand(List<String> args) {
         if (args.size() < 2) {
-            Console.pln("Invalid search syntax");
+            Console.pln("Find syntax -- \"find [COMMAND TYPE].[SEARCH TERM]\"");
+            Console.pln("Example -> \"find m.speed\" prints the following:");
+            List<String> exampleArgs = Arrays.asList("find", "m.speed");
+            findCommand(exampleArgs);
             return;
         }
 
@@ -459,26 +550,49 @@ public class NMXCommandLine {
      *            Path of the macro text file
      * @throws IOException
      */
-    private static void runMacro(Path path) throws IOException {
+    private static void runMacro(List<String> args) {
 
-        // Get the list of commands
-        final Charset ENCODING = StandardCharsets.UTF_8;
-        List<String> commands = Files.readAllLines(path, ENCODING);
+        try {
+            if (args.size() == 1) {
+                Console.pln("\nrunMacro syntax -- \"runMacro [PATH]\"");
+                Console.pln("Example -> \"runMacro c:\\NMXmacro.txt\"\n");
+                Console.pln("The text file should have one command on each line with the following syntax:\n\n"
+                        + "\"[DELAY TIME] [COMMAND TYPE].[COMMAND NAME] [DATA or MOTOR # (if required)] [MOTOR DATA (if required)]\"\n\n"
+                        + "The following example enables the camera, sets the focus time to 600ms, trigger time to 100ms, sets home\n"
+                        + "for each of the motors (e.g. sets current position to 0), immediately takes an exposure, commands the motors to\n"
+                        + "a new position, waits 5000ms, takes another exposure, waits 1000ms, commands the motors back to their original\n"
+                        + "positions, waits 5000ms, then takes a final exposure:\n\n" + "0 c.setEnable 1\n"
+                        + "0 c.setFocus 600 \n" + "0 c.setTrigger 100 \n" + "0 m.setHome 0\n" + "0 m.setHome 1\n"
+                        + "0 m.setHome 2\n" + "0 c.expose\n" + "0 m.sendTo 0 15000\n" + "0 m.sendTo 1 2560\n"
+                        + "0 m.sendTo 2 -5000\n" + "5000 c.expose\n" + "1000 m.sendTo 0 0\n" + "0 m.sendTo 1 0\n"
+                        + "0 m.sendTo 2 0\n" + "5000 c.expose\n\n"
+                        + "Lines in the macro file may be commented out by starting a line with \"//\"");
+            } else if (args.size() > 1) {
+                Path path = Paths.get(args.get(1));
+                // Get the list of commands
+                final Charset ENCODING = StandardCharsets.UTF_8;
+                List<String> commands = Files.readAllLines(path, ENCODING);
 
-        // Run them
-        for (int i = 0; i < commands.size(); i++) {
-            List<String> commandArgs = getArgs(commands.get(i), DELIMITER);
-            // Skip blank or commented lines
-            if ((commandArgs.get(0).trim().length() == 0) || commandArgs.get(0).indexOf("//") >= 0) {
-                continue;
+                // Run them
+                for (int i = 0; i < commands.size(); i++) {
+                    List<String> commandArgs = getArgs(commands.get(i), DELIMITER);
+                    // Skip blank or commented lines
+                    if ((commandArgs.get(0).trim().length() == 0) || commandArgs.get(0).indexOf("//") >= 0) {
+                        continue;
+                    }
+                    // Wait the requested delay
+                    wait(Integer.parseInt(commandArgs.get(0)));
+                    // Remove the delay time from the argument list
+                    commandArgs.remove(0);
+                    // Pass the remaining arguments to the command parser
+                    parseCommand(commandArgs);
+                }
             }
-            // Wait the requested delay
-            wait(Integer.parseInt(commandArgs.get(0)));
-            // Remove the delay time from the argument list
-            commandArgs.remove(0);
-            // Pass the remaining arguments to the command parser
-            parseCommand(commandArgs);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
+
     }
 
     /**
