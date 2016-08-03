@@ -21,459 +21,467 @@
 
 package com.dynamicperception.nmxcommandline.coms;
 
-
-import gnu.io.CommPortIdentifier;
-
-import java.lang.reflect.*;
+import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import jssc.*;
-
+import gnu.io.CommPortIdentifier;
+import jssc.SerialPort;
+import jssc.SerialPortEvent;
+import jssc.SerialPortEventListener;
+import jssc.SerialPortException;
+import jssc.SerialPortList;
 
 public class Serial implements SerialPortEventListener {
 
-  // *** Processing library vars *** //
-  public SerialPort port;
-  Method serialAvailableMethod;
-  Method serialEventMethod;
+    // *** Processing library vars *** //
+    public SerialPort             port;
+    Method                        serialAvailableMethod;
+    Method                        serialEventMethod;
 
-  byte[] buffer = new byte[32768];
-  int inBuffer = 0;
-  int readOffset = 0;
+    byte[]                        buffer                = new byte[32768];
+    int                           inBuffer              = 0;
+    int                           readOffset            = 0;
 
-  int bufferUntilSize = 1;
-  byte bufferUntilByte = 0;
+    int                           bufferUntilSize       = 1;
+    byte                          bufferUntilByte       = 0;
 
-  volatile boolean invokeSerialAvailable = false;
+    volatile boolean              invokeSerialAvailable = false;
 
+    // *** NMX communications vars *** //
+    int                           defaultBaudRate       = 57600;
 
-  // *** NMX communications vars *** //
-  int defaultBaudRate = 57600;  
+    private static Vector<String> port_list;
+    private static boolean        portsAvailable        = false;
+    private static boolean        portOpen              = false;
 
-  private static Vector<String> port_list;
-  private static boolean portsAvailable = false;
-  private static boolean portOpen = false;
-	
-  //*** Constructor *** //
-  public Serial() {   
-  }
-
-  //*** NMX communications functions *** //
-  
-  public static Vector<String> getPortList(){
-	  return port_list;
-  }
-  
-  public static boolean portsAvailable(){
-		return portsAvailable;
-	}
-	
-	public static boolean isPortOpen(){
-		return portOpen;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static void checkPorts() {
-		
-		Enumeration<CommPortIdentifier> portList;
-		Vector<String> portVect = new Vector<String>();
-		portList = CommPortIdentifier.getPortIdentifiers();
-
-		CommPortIdentifier portId;
-		while (portList.hasMoreElements()) {
-			portId = (CommPortIdentifier) portList.nextElement();
-			if (portId.getPortType() == CommPortIdentifier.PORT_SERIAL) {
-				portVect.add(portId.getName());
-			}
-		}
-		
-		port_list = portVect;
-		
-		// Display ports in console
-		System.out.println();
-		if (port_list.size() > 0) {
-			System.out
-					.println("The following serial ports have been detected:");
-		} else {
-			System.out
-					.println("Sorry, no serial ports were found on your computer\n");
-		}
-		for (int i = 0; i < port_list.size(); ++i) {
-			System.out.println("    " + Integer.toString(i + 1) + ":  "
-					+ port_list.elementAt(i));
-		}
-		
-		portsAvailable = true;
-	}
-  
-  // *** Functions from Processing library *** //
-  
-  public void openPort(int portID) {
-	  String portName = port_list.elementAt(portID);
-	  openPort(portName, defaultBaudRate);
-  }
-	
-  public void openPort(int portID, int baudRate) {
-	  String portName = port_list.elementAt(portID);
-	  openPort(portName, baudRate);
-  }
-  
-  public void openPort(String portName) {
-	  openPort(portName, defaultBaudRate, 'N', 8, 1);
-  }
-  
-  public void openPort(String portName, int baudRate) {
-	  openPort(portName, baudRate, 'N', 8, 1);
-  }
-	  
-  public void openPort(String portName, int baudRate, char parity, int dataBits, float stopBits) {
-
-    // setup parity
-    if (parity == 'O') {
-      parity = SerialPort.PARITY_ODD;
-    } else if (parity == 'E') {
-      parity = SerialPort.PARITY_EVEN;
-    } else if (parity == 'M') {
-      parity = SerialPort.PARITY_MARK;
-    } else if (parity == 'S') {
-      parity = SerialPort.PARITY_SPACE;
-    } else {
-      parity = SerialPort.PARITY_NONE;
+    // *** Constructor *** //
+    public Serial() {
     }
 
-    // setup stop bits
-    int stopBitsIdx = SerialPort.STOPBITS_1;
-    if (stopBits == 1.5f) {
-      stopBitsIdx = SerialPort.STOPBITS_1_5;
-    } else if (stopBits == 2) {
-      stopBitsIdx = SerialPort.STOPBITS_2;
+    // *** NMX communications functions *** //
+
+    public static Vector<String> getPortList() {
+        return port_list;
     }
 
-    port = new SerialPort(portName);
-    try {
-      System.out.println("Opening " + portName);
-      // the native open() call is not using O_NONBLOCK, so this might block for certain operations (see write())
-      port.openPort();
-      port.setParams(baudRate, dataBits, stopBitsIdx, parity);
-      
-      // we could register more events here
-      port.addEventListener(this, SerialPort.MASK_RXCHAR);
-    } catch (SerialPortException e) {    	
-      // this used to be a RuntimeException before, so stick with it
-      throw new RuntimeException("Error opening serial port " + e.getPortName() + ": " + e.getExceptionType());      
-    }
-    
-    portOpen = true;  
-  }
-      
-  public void dispose() {
-    closePort();
-  }
-  
-  /**
-   * Return true if this port is still active and hasn't run
-   * into any trouble.
-   */
-  public boolean active() {
-    return port.isOpened();
-  }
-
-  public int available() {
-    return (inBuffer-readOffset);
-  }
-  
-  public void buffer(int size) {
-    bufferUntilSize = size;
-  }
-  
-  public void bufferUntil(int inByte) {
-    bufferUntilSize = 0;
-    bufferUntilByte = (byte)inByte;
-  }
-  
-  public void clear() {
-    synchronized (buffer) {
-      inBuffer = 0;
-      readOffset = 0;
-    }
-  }
-
-  public boolean getCTS() {
-    try {
-      return port.isCTS();
-    } catch (SerialPortException e) {
-      throw new RuntimeException("Error reading the CTS line: " + e.getExceptionType());
-    }
-  }
-  
-  public boolean getDSR() {
-    try {
-      return port.isDSR();
-    } catch (SerialPortException e) {
-      throw new RuntimeException("Error reading the DSR line: " + e.getExceptionType());
-    }
-  }
-
-  public int last() {
-    if (inBuffer == readOffset) {
-      return -1;
+    public static boolean portsAvailable() {
+        return portsAvailable;
     }
 
-    synchronized (buffer) {
-      int ret = buffer[inBuffer-1] & 0xFF;
-      inBuffer = 0;
-      readOffset = 0;
-      return ret;
-    }
-  }
-  
-  public char lastChar() {
-    return (char)last();
-  }
-  
-  public static String[] list() {
-    // returns list sorted alphabetically, thus cu.* comes before tty.*
-    // this was different with RXTX
-    return SerialPortList.getPortNames();
-  }
-  
-  public int read() {
-    if (inBuffer == readOffset) {
-      return -1;
+    public static boolean isPortOpen() {
+        return portOpen;
     }
 
-    synchronized (buffer) {
-      int ret = buffer[readOffset++] & 0xFF;
-      if (inBuffer == readOffset) {
-        inBuffer = 0;
-        readOffset = 0;
-      }
-      return ret;
-    }
-  }
+    @SuppressWarnings("unchecked")
+    public static void checkPorts() {
 
-  public byte[] readBytes() {
-    if (inBuffer == readOffset) {
-      return null;
-    }
+        Enumeration<CommPortIdentifier> portList;
+        Vector<String> portVect = new Vector<String>();
+        portList = CommPortIdentifier.getPortIdentifiers();
 
-    synchronized (buffer) {
-      byte[] ret = new byte[inBuffer-readOffset];
-      System.arraycopy(buffer, readOffset, ret, 0, ret.length);
-      inBuffer = 0;
-      readOffset = 0;
-      return ret;
-    }
-  }
-  
-  public int readBytes(byte[] dest) {
-    if (inBuffer == readOffset) {
-      return 0;
-    }
-
-    synchronized (buffer) {
-      int toCopy = inBuffer-readOffset;
-      if (dest.length < toCopy) {
-        toCopy = dest.length;
-      }
-      System.arraycopy(buffer, readOffset, dest, 0, toCopy);
-      readOffset += toCopy;
-      if (inBuffer == readOffset) {
-        inBuffer = 0;
-        readOffset = 0;
-      }
-      return toCopy;
-    }
-  }
-  
-  public byte[] readBytesUntil(int inByte) {
-    if (inBuffer == readOffset) {
-      return null;
-    }
-
-    synchronized (buffer) {
-      // look for needle in buffer
-      int found = -1;
-      for (int i=readOffset; i < inBuffer; i++) {
-        if (buffer[i] == (byte)inByte) {
-          found = i;
-          break;
-        }
-      }
-      if (found == -1) {
-        return null;
-      }
-
-      int toCopy = found-readOffset+1;
-      byte[] dest = new byte[toCopy];
-      System.arraycopy(buffer, readOffset, dest, 0, toCopy);
-      readOffset += toCopy;
-      if (inBuffer == readOffset) {
-        inBuffer = 0;
-        readOffset = 0;
-      }
-      return dest;
-    }
-  }
-  
-  public int readBytesUntil(int inByte, byte[] dest) {
-    if (inBuffer == readOffset) {
-      return 0;
-    }
-
-    synchronized (buffer) {
-      // look for needle in buffer
-      int found = -1;
-      for (int i=readOffset; i < inBuffer; i++) {
-        if (buffer[i] == (byte)inByte) {
-          found = i;
-          break;
-        }
-      }
-      if (found == -1) {
-        return 0;
-      }
-
-      // check if bytes to copy fit in dest
-      int toCopy = found-readOffset+1;
-      if (dest.length < toCopy) {
-        System.err.println( "The buffer passed to readBytesUntil() is to small " +
-                  "to contain " + toCopy + " bytes up to and including " +
-                  "char " + (byte)inByte);
-        return -1;
-      }
-      System.arraycopy(buffer, readOffset, dest, 0, toCopy);
-      readOffset += toCopy;
-      if (inBuffer == readOffset) {
-        inBuffer = 0;
-        readOffset = 0;
-      }
-      return toCopy;
-    }
-  }
-  
-  public char readChar() {
-    return (char) read();
-  }
-  
-  public String readString() {
-    if (inBuffer == readOffset) {
-      return null;
-    }
-    return new String(readBytes());
-  }
-
-  public String readStringUntil(int inByte) {
-    byte temp[] = readBytesUntil(inByte);
-    if (temp == null) {
-      return null;
-    } else {
-      return new String(temp);
-    }
-  }
-
-  public void serialEvent(SerialPortEvent event) {
-    if (event.getEventType() == SerialPortEvent.RXCHAR) {
-      int toRead;
-      try {
-        while (0 < (toRead = port.getInputBufferBytesCount())) {
-          // this method can be called from the context of another thread
-          synchronized (buffer) {
-            // read one byte at a time if the sketch is using serialEvent
-            if (serialEventMethod != null) {
-              toRead = 1;
+        CommPortIdentifier portId;
+        while (portList.hasMoreElements()) {
+            portId = (CommPortIdentifier) portList.nextElement();
+            if (portId.getPortType() == CommPortIdentifier.PORT_SERIAL) {
+                portVect.add(portId.getName());
             }
-            // enlarge buffer if necessary
-            if (buffer.length < inBuffer+toRead) {
-              byte temp[] = new byte[buffer.length<<1];
-              System.arraycopy(buffer, 0, temp, 0, inBuffer);
-              buffer = temp;
-            }
-            // read an array of bytes and copy it into our buffer
-            byte[] read = port.readBytes(toRead);
-            System.arraycopy(read, 0, buffer, inBuffer, read.length);
-            inBuffer += read.length;
-          }
-          if (serialEventMethod != null) {
-            if ((0 < bufferUntilSize && bufferUntilSize <= inBuffer-readOffset) ||
-              (0 == bufferUntilSize && bufferUntilByte == buffer[inBuffer-1])) {
-              try {
-                // serialEvent() is invoked in the context of the current (serial) thread
-                // which means that serialization and atomic variables need to be used to
-                // guarantee reliable operation (and better not draw() etc..)
-                // serialAvailable() does not provide any real benefits over using
-                // available() and read() inside draw - but this function has no
-                // thread-safety issues since it's being invoked during pre in the context
-                // of the Processing applet
-                
-              } catch (Exception e) {
-                System.err.println("Error, disabling serialEvent() for "+port.getPortName());
-                System.err.println(e.getLocalizedMessage());
-                serialEventMethod = null;
-              }
-            }
-          }
-          invokeSerialAvailable = true;
         }
-      } catch (SerialPortException e) {
-        throw new RuntimeException("Error reading from serial port " + e.getPortName() + ": " + e.getExceptionType());
-      }
-    }
-  }
-  
-  public void setDTR(boolean state) {
-    // there is no way to influence the behavior of the DTR line when opening the serial port
-    // this means that at least on Linux and OS X, Arduino devices are always reset
-    try {
-      port.setDTR(state);
-    } catch (SerialPortException e) {
-      throw new RuntimeException("Error setting the DTR line: " + e.getExceptionType());
-    }
-  }
-  
-  public void setRTS(boolean state) {
-    try {
-      port.setRTS(state);
-    } catch (SerialPortException e) {
-      throw new RuntimeException("Error setting the RTS line: " + e.getExceptionType());
-    }
-  }
-  
-  public void closePort() {
-    try {
-      port.closePort();
-      portOpen = false;
-    } catch (SerialPortException e) {
-      // ignored
-    }
-    inBuffer = 0;
-    readOffset = 0;
-  }
-  
-  public void write(byte[] src) {
-    try {
-      // this might block if the serial device is not yet ready (esp. tty devices under OS X)
-      port.writeBytes(src);
-      // we used to call flush() here
-    } catch (SerialPortException e) {
-      throw new RuntimeException("Error writing to serial port " + e.getPortName() + ": " + e.getExceptionType());
-    }
-  }
-  
-  public void write(int src) {
-    try {
-      port.writeInt(src);
-    } catch (SerialPortException e) {
-      throw new RuntimeException("Error writing to serial port " + e.getPortName() + ": " + e.getExceptionType());
-    }
-  }
 
- public void write(String src) {
-    try {
-      port.writeString(src);
-    } catch (SerialPortException e) {
-      throw new RuntimeException("Error writing to serial port " + e.getPortName() + ": " + e.getExceptionType());
+        port_list = portVect;
+
+        // Display ports in console
+        System.out.println();
+        if (port_list.size() > 0) {
+            System.out.println("The following serial ports have been detected:");
+        } else {
+            System.out.println("Sorry, no serial ports were found on your computer\n");
+        }
+        for (int i = 0; i < port_list.size(); ++i) {
+            System.out.println("    " + Integer.toString(i + 1) + ":  " + port_list.elementAt(i));
+        }
+
+        portsAvailable = true;
     }
-  }
+
+    // *** Functions from Processing library *** //
+
+    public void openPort(int portID) {
+        String portName = port_list.elementAt(portID);
+        openPort(portName, defaultBaudRate);
+    }
+
+    public void openPort(int portID, int baudRate) {
+        String portName = port_list.elementAt(portID);
+        openPort(portName, baudRate);
+    }
+
+    public void openPort(String portName) {
+        openPort(portName, defaultBaudRate, 'N', 8, 1);
+    }
+
+    public void openPort(String portName, int baudRate) {
+        openPort(portName, baudRate, 'N', 8, 1);
+    }
+
+    public void openPort(String portName, int baudRate, char parity, int dataBits, float stopBits) {
+
+        // setup parity
+        if (parity == 'O') {
+            parity = SerialPort.PARITY_ODD;
+        } else if (parity == 'E') {
+            parity = SerialPort.PARITY_EVEN;
+        } else if (parity == 'M') {
+            parity = SerialPort.PARITY_MARK;
+        } else if (parity == 'S') {
+            parity = SerialPort.PARITY_SPACE;
+        } else {
+            parity = SerialPort.PARITY_NONE;
+        }
+
+        // setup stop bits
+        int stopBitsIdx = SerialPort.STOPBITS_1;
+        if (stopBits == 1.5f) {
+            stopBitsIdx = SerialPort.STOPBITS_1_5;
+        } else if (stopBits == 2) {
+            stopBitsIdx = SerialPort.STOPBITS_2;
+        }
+
+        port = new SerialPort(portName);
+        try {
+            System.out.println("Opening " + portName);
+            // the native open() call is not using O_NONBLOCK, so this might
+            // block for certain operations (see write())
+            port.openPort();
+            port.setParams(baudRate, dataBits, stopBitsIdx, parity);
+
+            // we could register more events here
+            port.addEventListener(this, SerialPort.MASK_RXCHAR);
+        } catch (SerialPortException e) {
+            // this used to be a RuntimeException before, so stick with it
+            throw new RuntimeException("Error opening serial port " + e.getPortName() + ": " + e.getExceptionType());
+        }
+
+        portOpen = true;
+    }
+
+    public void dispose() {
+        closePort();
+    }
+
+    /**
+     * Return true if this port is still active and hasn't run into any trouble.
+     */
+    public boolean active() {
+        return port.isOpened();
+    }
+
+    public int available() {
+        return (inBuffer - readOffset);
+    }
+
+    public void buffer(int size) {
+        bufferUntilSize = size;
+    }
+
+    public void bufferUntil(int inByte) {
+        bufferUntilSize = 0;
+        bufferUntilByte = (byte) inByte;
+    }
+
+    public void clear() {
+        synchronized (buffer) {
+            inBuffer = 0;
+            readOffset = 0;
+        }
+    }
+
+    public boolean getCTS() {
+        try {
+            return port.isCTS();
+        } catch (SerialPortException e) {
+            throw new RuntimeException("Error reading the CTS line: " + e.getExceptionType());
+        }
+    }
+
+    public boolean getDSR() {
+        try {
+            return port.isDSR();
+        } catch (SerialPortException e) {
+            throw new RuntimeException("Error reading the DSR line: " + e.getExceptionType());
+        }
+    }
+
+    public int last() {
+        if (inBuffer == readOffset) {
+            return -1;
+        }
+
+        synchronized (buffer) {
+            int ret = buffer[inBuffer - 1] & 0xFF;
+            inBuffer = 0;
+            readOffset = 0;
+            return ret;
+        }
+    }
+
+    public char lastChar() {
+        return (char) last();
+    }
+
+    public static String[] list() {
+        // returns list sorted alphabetically, thus cu.* comes before tty.*
+        // this was different with RXTX
+        return SerialPortList.getPortNames();
+    }
+
+    public int read() {
+        if (inBuffer == readOffset) {
+            return -1;
+        }
+
+        synchronized (buffer) {
+            int ret = buffer[readOffset++] & 0xFF;
+            if (inBuffer == readOffset) {
+                inBuffer = 0;
+                readOffset = 0;
+            }
+            return ret;
+        }
+    }
+
+    public byte[] readBytes() {
+        if (inBuffer == readOffset) {
+            return null;
+        }
+
+        synchronized (buffer) {
+            byte[] ret = new byte[inBuffer - readOffset];
+            System.arraycopy(buffer, readOffset, ret, 0, ret.length);
+            inBuffer = 0;
+            readOffset = 0;
+            return ret;
+        }
+    }
+
+    public int readBytes(byte[] dest) {
+        if (inBuffer == readOffset) {
+            return 0;
+        }
+
+        synchronized (buffer) {
+            int toCopy = inBuffer - readOffset;
+            if (dest.length < toCopy) {
+                toCopy = dest.length;
+            }
+            System.arraycopy(buffer, readOffset, dest, 0, toCopy);
+            readOffset += toCopy;
+            if (inBuffer == readOffset) {
+                inBuffer = 0;
+                readOffset = 0;
+            }
+            return toCopy;
+        }
+    }
+
+    public byte[] readBytesUntil(int inByte) {
+        if (inBuffer == readOffset) {
+            return null;
+        }
+
+        synchronized (buffer) {
+            // look for needle in buffer
+            int found = -1;
+            for (int i = readOffset; i < inBuffer; i++) {
+                if (buffer[i] == (byte) inByte) {
+                    found = i;
+                    break;
+                }
+            }
+            if (found == -1) {
+                return null;
+            }
+
+            int toCopy = found - readOffset + 1;
+            byte[] dest = new byte[toCopy];
+            System.arraycopy(buffer, readOffset, dest, 0, toCopy);
+            readOffset += toCopy;
+            if (inBuffer == readOffset) {
+                inBuffer = 0;
+                readOffset = 0;
+            }
+            return dest;
+        }
+    }
+
+    public int readBytesUntil(int inByte, byte[] dest) {
+        if (inBuffer == readOffset) {
+            return 0;
+        }
+
+        synchronized (buffer) {
+            // look for needle in buffer
+            int found = -1;
+            for (int i = readOffset; i < inBuffer; i++) {
+                if (buffer[i] == (byte) inByte) {
+                    found = i;
+                    break;
+                }
+            }
+            if (found == -1) {
+                return 0;
+            }
+
+            // check if bytes to copy fit in dest
+            int toCopy = found - readOffset + 1;
+            if (dest.length < toCopy) {
+                System.err.println("The buffer passed to readBytesUntil() is to small " + "to contain " + toCopy
+                        + " bytes up to and including " + "char " + (byte) inByte);
+                return -1;
+            }
+            System.arraycopy(buffer, readOffset, dest, 0, toCopy);
+            readOffset += toCopy;
+            if (inBuffer == readOffset) {
+                inBuffer = 0;
+                readOffset = 0;
+            }
+            return toCopy;
+        }
+    }
+
+    public char readChar() {
+        return (char) read();
+    }
+
+    public String readString() {
+        if (inBuffer == readOffset) {
+            return null;
+        }
+        return new String(readBytes());
+    }
+
+    public String readStringUntil(int inByte) {
+        byte temp[] = readBytesUntil(inByte);
+        if (temp == null) {
+            return null;
+        } else {
+            return new String(temp);
+        }
+    }
+
+    public void serialEvent(SerialPortEvent event) {
+        if (event.getEventType() == SerialPortEvent.RXCHAR) {
+            int toRead;
+            try {
+                while (0 < (toRead = port.getInputBufferBytesCount())) {
+                    // this method can be called from the context of another
+                    // thread
+                    synchronized (buffer) {
+                        // read one byte at a time if the sketch is using
+                        // serialEvent
+                        if (serialEventMethod != null) {
+                            toRead = 1;
+                        }
+                        // enlarge buffer if necessary
+                        if (buffer.length < inBuffer + toRead) {
+                            byte temp[] = new byte[buffer.length << 1];
+                            System.arraycopy(buffer, 0, temp, 0, inBuffer);
+                            buffer = temp;
+                        }
+                        // read an array of bytes and copy it into our buffer
+                        byte[] read = port.readBytes(toRead);
+                        System.arraycopy(read, 0, buffer, inBuffer, read.length);
+                        inBuffer += read.length;
+                    }
+                    if (serialEventMethod != null) {
+                        if ((0 < bufferUntilSize && bufferUntilSize <= inBuffer - readOffset)
+                                || (0 == bufferUntilSize && bufferUntilByte == buffer[inBuffer - 1])) {
+                            try {
+                                // serialEvent() is invoked in the context of
+                                // the current (serial) thread
+                                // which means that serialization and atomic
+                                // variables need to be used to
+                                // guarantee reliable operation (and better not
+                                // draw() etc..)
+                                // serialAvailable() does not provide any real
+                                // benefits over using
+                                // available() and read() inside draw - but this
+                                // function has no
+                                // thread-safety issues since it's being invoked
+                                // during pre in the context
+                                // of the Processing applet
+
+                            } catch (Exception e) {
+                                System.err.println("Error, disabling serialEvent() for " + port.getPortName());
+                                System.err.println(e.getLocalizedMessage());
+                                serialEventMethod = null;
+                            }
+                        }
+                    }
+                    invokeSerialAvailable = true;
+                }
+            } catch (SerialPortException e) {
+                throw new RuntimeException(
+                        "Error reading from serial port " + e.getPortName() + ": " + e.getExceptionType());
+            }
+        }
+    }
+
+    public void setDTR(boolean state) {
+        // there is no way to influence the behavior of the DTR line when
+        // opening the serial port
+        // this means that at least on Linux and OS X, Arduino devices are
+        // always reset
+        try {
+            port.setDTR(state);
+        } catch (SerialPortException e) {
+            throw new RuntimeException("Error setting the DTR line: " + e.getExceptionType());
+        }
+    }
+
+    public void setRTS(boolean state) {
+        try {
+            port.setRTS(state);
+        } catch (SerialPortException e) {
+            throw new RuntimeException("Error setting the RTS line: " + e.getExceptionType());
+        }
+    }
+
+    public void closePort() {
+        try {
+            port.closePort();
+            portOpen = false;
+        } catch (SerialPortException e) {
+            // ignored
+        }
+        inBuffer = 0;
+        readOffset = 0;
+    }
+
+    public void write(byte[] src) {
+        try {
+            // this might block if the serial device is not yet ready (esp. tty
+            // devices under OS X)
+            port.writeBytes(src);
+            // we used to call flush() here
+        } catch (SerialPortException e) {
+            throw new RuntimeException("Error writing to serial port " + e.getPortName() + ": " + e.getExceptionType());
+        }
+    }
+
+    public void write(int src) {
+        try {
+            port.writeInt(src);
+        } catch (SerialPortException e) {
+            throw new RuntimeException("Error writing to serial port " + e.getPortName() + ": " + e.getExceptionType());
+        }
+    }
+
+    public void write(String src) {
+        try {
+            port.writeString(src);
+        } catch (SerialPortException e) {
+            throw new RuntimeException("Error writing to serial port " + e.getPortName() + ": " + e.getExceptionType());
+        }
+    }
 }

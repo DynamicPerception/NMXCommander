@@ -1,14 +1,12 @@
 package com.dynamicperception.nmxcommandline.models;
 
 /**
- * This interface allows for construction of custom
- * command execution behaviors. An example would be 
- * a compound command that does not exist in the
- * firmware, but which is constructed of several 
- * firmware commands.
- * <br><br>
- * For example, the following allows setting a motor
- * to a constant velocity and running it until stopped:<br>
+ * This interface allows for construction of custom command execution behaviors.
+ * An example would be a compound command that does not exist in the firmware,
+ * but which is constructed of several firmware commands. <br>
+ * <br>
+ * For example, the following allows setting a motor to a constant velocity and
+ * running it until stopped:<br>
  * <code><pre>
  * class MoveAtVelExecute implements ExecuteStructure{
  * 	Command thisCommand;
@@ -33,11 +31,14 @@ package com.dynamicperception.nmxcommandline.models;
  *	}			
  * }
  * </pre></code>
+ * 
  * @author Michael
  *
  */
 public interface ExecuteStructure {
-	<T>T executeThis();
-	<T>T executeThis(String dataOrMotor);
-	<T>T executeThis(String motor, String data);
+    <T> T executeThis();
+
+    <T> T executeThis(String dataOrMotor);
+
+    <T> T executeThis(String motor, String data);
 }
