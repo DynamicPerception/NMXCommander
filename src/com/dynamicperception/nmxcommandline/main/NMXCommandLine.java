@@ -213,15 +213,20 @@ public class NMXCommandLine {
         // Skip if it's a comment line
         else if (args.get(0).indexOf("//") != -1) {
             return;
-        } else if (args.get(0).equals("help")) {
+        }
+        else if (args.get(0).equals("help")) {
             printHelp();
-        } else if (args.get(0).equals("commandDetail")) {
+        }
+        else if (args.get(0).equals("commandDetail")) {
             commandDetail(args);
-        } else if (args.get(0).equals("serialDetail")) {
+        }
+        else if (args.get(0).equals("serialDetail")) {
             serialDetail(args);
-        } else if (args.get(0).equals("outputAddress")) {
+        }
+        else if (args.get(0).equals("outputAddress")) {
             outputAddress(args);
-        } else if (args.get(0).equals("responseTimeout")) {
+        }
+        else if (args.get(0).equals("responseTimeout")) {
             responseTimeout(args);
         }
         // Run command list from file
@@ -373,7 +378,7 @@ public class NMXCommandLine {
 
     /**
      * This method prints information about using the list command or a list of
-     * all valid commands for a specific command subtype.
+     * all valid commands for a specific command sub-type.
      * 
      * @param args
      *            A List of String arguments that comprise the command.
@@ -431,7 +436,8 @@ public class NMXCommandLine {
                     + "from 0-255. If [LENGTH] != 0, [DATA] may be a byte, int, long, or float,\n"
                     + "depending on the command. If [LENGTH] == 0, do not include the [DATA]\n"
                     + "parameter. [RESPONSE] is a boolean value.");
-        } else {
+        }
+        else {
             List<Integer> intArgs = new ArrayList<>();
             for (int i = 1; i < args.size(); i++) {
                 String arg = args.get(i);
@@ -444,7 +450,8 @@ public class NMXCommandLine {
                 NMXComs.setSerialDetail(true);
                 if (intArgs.size() == 5) {
                     NMXComs.cmd(intArgs.get(0), intArgs.get(1), intArgs.get(2), intArgs.get(3), 0, response);
-                } else {
+                }
+                else {
                     NMXComs.cmd(intArgs.get(0), intArgs.get(1), intArgs.get(2), intArgs.get(3), intArgs.get(4),
                             response);
                 }
@@ -468,10 +475,10 @@ public class NMXCommandLine {
      * @param args
      *            Command arguments as a list of String arguments with the
      *            following syntax: <br>
-     *            [0] == "&ltCOMMAND TYPE&gt.&ltCOMMAND NAME&gt" <br>
-     *            [1] == "-h" for help OR "&ltCOMMAND DATA&gt" or "&ltMOTOR
-     *            NUMBER&gt (optional) <br>
-     *            [2] == "&ltCOMMAND DATA&gt"(if [1] == &ltMOTOR NUMBER&gt
+     *            [0] == "[COMMAND TYPE].[COMMAND NAME]" <br>
+     *            [1] == "-h" for help OR "[COMMAND DATA]" or "[MOTOR
+     *            NUMBER] (optional) <br>
+     *            [2] == "[COMMAND DATA]"(if [1] == [MOTOR NUMBER]
      *            (optional))
      */
     private static void runCommand(List<String> args) {
@@ -490,9 +497,11 @@ public class NMXCommandLine {
 
             if (args.size() == 1) {
                 Command.execute(cmdStr);
-            } else if (args.size() == 2) {
+            }
+            else if (args.size() == 2) {
                 Command.execute(cmdStr, args.get(1));
-            } else if (args.size() == 3) {
+            }
+            else if (args.size() == 3) {
                 Command.execute(cmdStr, args.get(1), args.get(2));
             }
         } catch (UnsupportedOperationException e) {
@@ -567,7 +576,8 @@ public class NMXCommandLine {
                         + "0 m.sendTo 2 -5000\n" + "5000 c.expose\n" + "1000 m.sendTo 0 0\n" + "0 m.sendTo 1 0\n"
                         + "0 m.sendTo 2 0\n" + "5000 c.expose\n\n"
                         + "Lines in the macro file may be commented out by starting a line with \"//\"");
-            } else if (args.size() > 1) {
+            }
+            else if (args.size() > 1) {
                 Path path = Paths.get(args.get(1));
                 // Get the list of commands
                 final Charset ENCODING = StandardCharsets.UTF_8;
@@ -624,13 +634,15 @@ public class NMXCommandLine {
             // Ignore comment lines
             if (args.get(0).indexOf("//") >= 0) {
                 continue;
-            } else if (args.get(10).indexOf("*/") >= 0) {
+            }
+            else if (args.get(10).indexOf("*/") >= 0) {
                 ignore = false;
                 // Adjust the start time so we're not stuck waiting for the next
                 // command
                 startTime -= Long.parseLong(args.get(1)) - startIgnore;
                 continue;
-            } else if (args.get(0).indexOf("/*") >= 0) {
+            }
+            else if (args.get(0).indexOf("/*") >= 0) {
                 ignore = true;
                 startIgnore = Long.parseLong(args.get(1));
                 continue;
