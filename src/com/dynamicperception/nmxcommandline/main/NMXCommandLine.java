@@ -23,7 +23,7 @@ public class NMXCommandLine {
 
     private static boolean execute;
     private static Serial  serial;
-    final static String    DELIMITER = " ";
+    final static String    DELIMITER    = " ";
     // private static long lastTime;
     private static String  version   = "0.4-beta";
 
@@ -31,30 +31,11 @@ public class NMXCommandLine {
         // Create serial object
         serial = new Serial();
         NMXComs.setSerialObject(serial);
+        Serial.populatePorts();
 
         // If arguments ares supplied upon execution, run only those, then quit
         if (args.length > 0) {
-
-            if (args[0].toLowerCase().equals("help")) {
-                printTerminalHelp();
-                quit();
-            }
-
-            try {
-                serial.openPort(Integer.parseInt(args[0]));
-            } catch (RuntimeException e) {
-                Console.pln("Invalid port! Either you picked the wrong number or you have the wrong syntax.\n"
-                        + "A full one-time execution should look something like this: "
-                        + "\"NMXCmd.jar COM32 m.sendTo 0 15000\"");
-                quit();
-            }
-
-            List<String> commandArgs = new ArrayList<String>();
-            for (int i = 1; i < args.length; i++) {
-                commandArgs.add(args[i]);
-            }
-            parseCommand(commandArgs);
-            quit();
+            oneTimeCommand(args);
         }
 
         // Get user to select port
@@ -106,7 +87,7 @@ public class NMXCommandLine {
      * Prints general application help
      */
     private static void printHelp() {
-        Console.pln("\n\n******** NMX Commander " + version + " Overview ********\n\n"
+        Console.pln("\n\n******** NMX Commander " + full_version + " Overview ********\n\n"
                 + "This command line tool allows you to manually send single instuctions to the NMX controller.\n"
                 + "This is done by giving input with the following syntax:\n\n"
                 + "Non-motor commands -- \"[COMMAND TYPE].[COMMAND NAME] [DATA (if required)]\"\n"
@@ -151,11 +132,48 @@ public class NMXCommandLine {
     }
 
     /**
+     * Starts the execution of a single command initiated as arguments passed to
+     * the program at launch
+     * 
+     * @param args
+     *            The arguments passed from the terminal upon program launch
+     */
+    private static void oneTimeCommand(String[] args) {
+        if (args[0].toLowerCase().equals("help")) {
+            printTerminalHelp();
+            quit();
+        }
+        try {
+            String portName = args[0];
+            int port = -1;
+            for (int i = 0; i < Serial.getPortList().size(); i++) {
+                if (Serial.getPortList().get(i).equals(portName)) {
+                    port = i;
+                }
+            }
+            serial.openPort(port);
+        } catch (RuntimeException e) {
+            Console.pln("Invalid port! Either you picked the wrong number or you have the wrong syntax.\n"
+                    + "Syntax"
+                    + "A full one-time execution should look something like this: "
+                    + "\"NMXCommander-" + version + ".jar COM32 m.sendTo 0 15000\"");
+            quit();
+        }
+
+        List<String> commandArgs = new ArrayList<String>();
+        for (int i = 1; i < args.length; i++) {
+            commandArgs.add(args[i]);
+        }
+        parseCommand(commandArgs);
+        quit();
+    }
+
+    /**
      * Displays a list of available ports and prompts user for selection
      */
     private static void promptForPort() {
-        // Population the serial port list and display it
-        Serial.checkPorts();
+        // Populate the serial port list and display it
+        Serial.printPorts();
         Console.pln(Serial.list() + "\n");
 
         // Ask user to open serial port

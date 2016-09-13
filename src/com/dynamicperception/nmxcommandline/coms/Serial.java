@@ -74,8 +74,7 @@ public class Serial implements SerialPortEventListener {
     }
 
     @SuppressWarnings("unchecked")
-    public static void checkPorts() {
-
+    public static void populatePorts() {
         Enumeration<CommPortIdentifier> portList;
         Vector<String> portVect = new Vector<String>();
         portList = CommPortIdentifier.getPortIdentifiers();
@@ -89,12 +88,16 @@ public class Serial implements SerialPortEventListener {
         }
 
         port_list = portVect;
+    }
+
+    public static void printPorts() {
 
         // Display ports in console
         System.out.println();
         if (port_list.size() > 0) {
             System.out.println("The following serial ports have been detected:");
-        } else {
+        }
+        else {
             System.out.println("Sorry, no serial ports were found on your computer\n");
         }
         for (int i = 0; i < port_list.size(); ++i) {
@@ -107,6 +110,7 @@ public class Serial implements SerialPortEventListener {
     // *** Functions from Processing library *** //
 
     public void openPort(int portID) {
+        System.out.println("Tying to open port id: " + portID);
         String portName = port_list.elementAt(portID);
         openPort(portName, defaultBaudRate);
     }
@@ -129,13 +133,17 @@ public class Serial implements SerialPortEventListener {
         // setup parity
         if (parity == 'O') {
             parity = SerialPort.PARITY_ODD;
-        } else if (parity == 'E') {
+        }
+        else if (parity == 'E') {
             parity = SerialPort.PARITY_EVEN;
-        } else if (parity == 'M') {
+        }
+        else if (parity == 'M') {
             parity = SerialPort.PARITY_MARK;
-        } else if (parity == 'S') {
+        }
+        else if (parity == 'S') {
             parity = SerialPort.PARITY_SPACE;
-        } else {
+        }
+        else {
             parity = SerialPort.PARITY_NONE;
         }
 
@@ -143,7 +151,8 @@ public class Serial implements SerialPortEventListener {
         int stopBitsIdx = SerialPort.STOPBITS_1;
         if (stopBits == 1.5f) {
             stopBitsIdx = SerialPort.STOPBITS_1_5;
-        } else if (stopBits == 2) {
+        }
+        else if (stopBits == 2) {
             stopBitsIdx = SerialPort.STOPBITS_2;
         }
 
@@ -364,7 +373,8 @@ public class Serial implements SerialPortEventListener {
         byte temp[] = readBytesUntil(inByte);
         if (temp == null) {
             return null;
-        } else {
+        }
+        else {
             return new String(temp);
         }
     }
