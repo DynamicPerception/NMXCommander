@@ -23,10 +23,11 @@ public class NMXCommandLine {
 
     private static boolean execute;
     private static Serial  serial;
-    final static String    DELIMITER    = " ";
+    final static String    DELIMITER          = " ";
     // private static long lastTime;
-    private static String  version      = "0.4.1";
-    private static String  full_version = version + "-beta";
+    private static String  version            = "0.4.1";
+    private static String  fullVersion        = version + "-beta";
+    private static String  firmwareCommandSet = "0.60";
 
     public static void main(String[] args) {
         // Create serial object
@@ -88,48 +89,66 @@ public class NMXCommandLine {
      * Prints general application help
      */
     private static void printHelp() {
-        Console.pln("\n\n******** NMX Commander " + full_version + " Overview ********\n\n"
-                + "This command line tool allows you to manually send single instuctions to the NMX controller.\n"
-                + "This is done by giving input with the following syntax:\n\n"
-                + "Non-motor commands -- \"[COMMAND TYPE].[COMMAND NAME] [DATA (if required)]\"\n"
-                + "Motor commands -- \"m.[COMMAND NAME] [MOTOR #] [DATA (if required)]\"\n\n"
-                + "Non-motor command types include \"g\" (general), \"c\" (camera), and \"k\" (key frame)\n"
-                + "When specifying the motor number for motor commands, counting starts at 0 (i.e. valid motor #s are 0, 1, 2)\n\n\n"
-                + "******** NMX Commander Configuration Commands ********\n\n"
-                + "* \"outputAddress [ADDR # optional argument]\" -- without optional parameter, reports the current command address. With the\n"
-                + "optional parameter, sets the address to which the command will be sent. This is 3 by default and should not be changed unless\n"
-                + "you have manually reassigned the address of one or more of your controllers. !!!Sending commands to an incorrect address will\n"
-                + "cause you lots of headaches!!!\n\n"
-                + "* \"commandDetail [0/1 optional argument]\" -- without optional parameter, reports whether commandDetail is enabled. With the\n"
-                + "optional parameter, sets commandDetail enabled. If true, NMX Commander will print the command name and any additional data\n"
-                + "output to the NMX\n\n"
-                + "* \"serialDetail [0/1 optional argument]\" -- without optional parameter, reports whether serialDetail is enabled. With the\n"
-                + "optional parameter, sets serialDetail enabled. If true, NMX Commander will print the raw packet received from the NMX for\n"
-                + "each command\n\n\n"
-                + "* \"responseTimout [TIMEOUT optional argument]\" -- without optional parameter, reports current response timeout in milliseconds\n"
-                + "With optional parameter, sets timeout length. If you find that you encounter a situation where you are getting many timeouts that\n"
-                + "are not causing problems (e.g. you don't care about the response contents, but the command seems to be executing properly), you\n"
-                + "may want to shorten the timout in order to increase command throughput.\n\n\n"
-                + "******** Other Useful Commands ********\n\n" + "* \"help\" -- prints this information again\n\n"
-                + "* \"[COMMAND TYPE].[COMMAND NAME] -h\" -- prints command-specific help\n\n"
-                + "* \"list [COMMAND TYPE]\" -- lists all commands of that type\n\n"
-                + "* \"find [COMMAND TYPE].[SEARCH TERM]\" -- returns all commands of that type containing the search term\n\n"
-                + "* \"repeat [N] [COMMAND TYPE].[COMMAND NAME]\" -- repeats the given command N times\n\n"
-                + "* \"runMacro [PATH]\" -- runs a command macro list from a text file. Type \"runMacro\" without arguments\n"
-                + "for macro file syntax\n\n" + "* \"exit\" -- closes the serial port and exits the application\n\n\n"
-                + "******** Some Important Tips ********\n\n"
-                + "* A boolean (true/false) value is indicated by a data value of 0 or 1. For example, the command to enable the camera\n"
-                + "would be \"c.setEnable 1\".\n\n"
-                + "* Valid microstep settings are 4, 8, and 16. The NMX does not use full or half steps in order to reduce vibation.\n\n"
-                + "* The controller accepts and returns step counts that correspond to relevant motor's current microstep setting.\n"
-                + "If the NMX reports a motor position of 500 when the microstep setting is 4, it will report 1000 when the microstep\n"
-                + "setting is 8, and 2000 when the microstep setting is 16 (as long as the motor doesn't move). Same deal if you\n"
-                + "command a motor to move somewhere. If you command a move of 10000 steps when in quarter stepping mode (i.e. microstep\n"
-                + "setting = 4), it will go twice as far as when in eighth stepping mode (i.e. microstep setting = 8).\n"
-                + "BE CAREFUL ABOUT THIS! If you accidentally send your rig two or four times as far as you intended, you can break\n"
-                + "your valueable equipment!\n\n"
-                + "* If you try to send a motor to a position and it either does not move or does not go all the way to where you sent it,\n"
-                + "try running the command \"m.resetLimits [MOTOR #]\" to clear any end limits that may be restricting movement.");
+        Console.pln(
+                "\n\n"
+                        + "******** Disclaimer ********\n\n"
+                        + "THIS TOOL IS INTENDED FOR DEVELOPMENT PURPOSES BY ADVANCED USERS ONLY. DYNAMIC PERCEPTION ACCEPTS NO RESPONSIBILITY FOR\n"
+                        + "DAMAGE OR INJURY CAUSED BY THE IMPROPER USE OF THIS SOFTWARE. USERS SHOULD HAVE A SOUND UNDERSTANDING OF STEPPER MOTORS\n"
+                        + "AND PRINCIPLES OF MICROSTEPPING DRIVERS BEFORE USING THIS TOOL.\n\n\n"
+                        + "******** Version ********\n\n"
+                        + "NMX Commander Version = " + fullVersion + "\n"
+                        + "Firmware Command Set = " + firmwareCommandSet + "\n\n"
+                        + "Firmware commands implemented after this firmware version are not supported. See goo.gl/S0wHPX for command set details.\n\n\n"
+                        + "******** NMX Commander Overview ********\n\n"
+                        + "This command line tool allows you to manually send single instuctions to the NMX controller.\n"
+                        + "This is done by giving input with the following syntax:\n\n"
+                        + "Non-motor commands -- \"[COMMAND TYPE].[COMMAND NAME] [DATA (if required)]\"\n"
+                        + "Motor commands -- \"m.[COMMAND NAME] [MOTOR #] [DATA (if required)]\"\n\n"
+                        + "Non-motor command types include \"g\" (general), \"c\" (camera), and \"k\" (key frame)\n"
+                        + "When specifying the motor number for motor commands, counting starts at 0 (i.e. valid motor #s are 0, 1, 2)\n\n\n"
+                        + "******** NMX Commander Configuration Commands ********\n\n"
+                        + "* \"outputAddress [ADDR # optional argument]\" -- without optional parameter, reports the current command address. With the\n"
+                        + "optional parameter, sets the address to which the command will be sent. This is 3 by default and should not be changed unless\n"
+                        + "you have manually reassigned the address of one or more of your controllers. !!!Sending commands to an incorrect address will\n"
+                        + "cause you lots of headaches!!!\n\n"
+                        + "* \"commandDetail [0/1 optional argument]\" -- without optional parameter, reports whether commandDetail is enabled. With the\n"
+                        + "optional parameter, sets commandDetail enabled. If true, NMX Commander will print the command name and any additional data\n"
+                        + "output to the NMX\n\n"
+                        + "* \"serialDetail [0/1 optional argument]\" -- without optional parameter, reports whether serialDetail is enabled. With the\n"
+                        + "optional parameter, sets serialDetail enabled. If true, NMX Commander will print the raw packet received from the NMX for\n"
+                        + "each command\n\n\n"
+                        + "* \"responseTimout [TIMEOUT optional argument]\" -- without optional parameter, reports current response timeout in milliseconds\n"
+                        + "With optional parameter, sets timeout length. If you find that you encounter a situation where you are getting many timeouts that\n"
+                        + "are not causing problems (e.g. you don't care about the response contents, but the command seems to be executing properly), you\n"
+                        + "may want to shorten the timout in order to increase command throughput.\n\n\n"
+                        + "******** Other Useful Commands ********\n\n"
+                        + "* \"help\" -- prints this information again\n\n"
+                        + "* \"[COMMAND TYPE].[COMMAND NAME] -h\" -- prints command-specific help\n\n"
+                        + "* \"list [COMMAND TYPE]\" -- lists all commands of that type\n\n"
+                        + "* \"find [COMMAND TYPE].[SEARCH TERM]\" -- returns all commands of that type containing the search term\n\n"
+                        + "* \"repeat [N] [COMMAND TYPE].[COMMAND NAME]\" -- repeats the given command N times\n\n"
+                        + "* \"runMacro [PATH]\" -- runs a command macro list from a text file. Type \"runMacro\" without arguments\n"
+                        + "for macro file syntax\n\n"
+                        + "* \"exit\" -- closes the serial port and exits the application\n\n\n"
+                        + "******** Command as Program Argument (One-Shot Mode) ********\n\n"
+                        + "Commands may be executed directly from the command terminal or a batch script by passing the desired command as arguments, using "
+                        + "the following syntax:\n\n"
+                        + "\"NMXCommander-" + version
+                        + ".jar [COM PORT NUMBER] [COMMAND TYPE].[COMMAND NAME] [MOTOR # (if required)] [DATA (if required)]\"\n\n"
+                        + "You may remind yourself of the syntax by running the program with --help or -h as arguments.\n\n\n"
+                        + "******** Some Important Tips ********\n\n"
+                        + "* A boolean (true/false) value is indicated by a data value of 0 or 1. For example, the command to enable the camera\n"
+                        + "would be \"c.setEnable 1\".\n\n"
+                        + "* Valid microstep settings are 4, 8, and 16. The NMX does not use full or half steps in order to reduce vibation.\n\n"
+                        + "* The controller accepts and returns step counts that correspond to relevant motor's current microstep setting.\n"
+                        + "If the NMX reports a motor position of 500 when the microstep setting is 4, it will report 1000 when the microstep\n"
+                        + "setting is 8, and 2000 when the microstep setting is 16 (as long as the motor doesn't move). Same deal if you\n"
+                        + "command a motor to move somewhere. If you command a move of 10000 steps when in quarter stepping mode (i.e. microstep\n"
+                        + "setting = 4), it will go twice as far as when in eighth stepping mode (i.e. microstep setting = 8).\n"
+                        + "BE CAREFUL ABOUT THIS! If you accidentally send your rig two or four times as far as you intended, you can break\n"
+                        + "your valueable equipment!\n\n"
+                        + "* If you try to send a motor to a position and it either does not move or does not go all the way to where you sent it,\n"
+                        + "try running the command \"m.resetLimits [MOTOR #]\" to clear any end limits that may be restricting movement.");
     }
 
     /**
@@ -140,7 +159,7 @@ public class NMXCommandLine {
      *            The arguments passed from the terminal upon program launch
      */
     private static void oneTimeCommand(String[] args) {
-        if (args[0].toLowerCase().equals("help")) {
+        if (args[0].toLowerCase().equals("--help") || args[0].toLowerCase().equals("-h")) {
             printTerminalHelp();
             quit();
         }
@@ -148,16 +167,18 @@ public class NMXCommandLine {
             String portName = args[0];
             int port = -1;
             for (int i = 0; i < Serial.getPortList().size(); i++) {
-                if (Serial.getPortList().get(i).equals(portName)) {
+                if (Serial.getPortList().get(i).substring(3).equals(portName)) {
                     port = i;
                 }
             }
             serial.openPort(port);
         } catch (RuntimeException e) {
             Console.pln("Invalid port! Either you picked the wrong number or you have the wrong syntax.\n"
-                    + "Syntax"
+                    + "Syntax is: "
+                    + "\"NMXCommander-" + version
+                    + ".jar [COM PORT NUMBER] [COMMAND TYPE].[COMMAND NAME] [MOTOR # (if required)] [DATA (if required)]\"\n\n"
                     + "A full one-time execution should look something like this: "
-                    + "\"NMXCommander-" + version + ".jar COM32 m.sendTo 0 15000\"");
+                    + "\"NMXCommander-" + version + ".jar 32 m.sendTo 0 15000\"");
             quit();
         }
 
