@@ -11,5 +11,7 @@ In order to run the jar file from the command line, navigate to the directory in
 
 Alternatively, the JAR file can be run with arguments to run a single NMX command, then immediately close the serial port and close the application. Run the JAR file with the argument "help" for details.
 
-###### Dependent Libraries
-* Make sure to add the .jar files found in "libraries" folder to \lib\ext in your local Java JRE folder.
+##### Dependent Libraries
+* Add RXTXcomm.jar and jssc.jar to \lib\ext in your local Java JRE directory
+* Add rxtxSerial.dll to \bin in your local Java JRE directory
+* If running on OS X, also place librxtxSerial.jnilib in the Java \lib\ext directory
