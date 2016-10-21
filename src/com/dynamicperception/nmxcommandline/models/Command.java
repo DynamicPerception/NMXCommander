@@ -59,7 +59,8 @@ public class Command {
                 System.out.println("This is a motor command; the motor number must be specified to execute");
                 thisCommand.printInfo();
                 throw new UnsupportedOperationException();
-            } else {
+            }
+            else {
                 return executeThis(thisCommand.subaddr, "0", false);
             }
         }
@@ -74,7 +75,8 @@ public class Command {
                 }
                 int tempSubaddr = motor + 1;
                 return executeThis(tempSubaddr, "0", false);
-            } else {
+            }
+            else {
                 return executeThis(thisCommand.subaddr, dataOrMotor, true);
             }
         }
@@ -89,7 +91,8 @@ public class Command {
                 }
                 int tempSubaddr = motorNum + 1;
                 return executeThis(tempSubaddr, data, true);
-            } else {
+            }
+            else {
                 System.out.println("This is a non-motor command; a motor number may not be specified");
                 thisCommand.printInfo();
                 throw new UnsupportedOperationException();
@@ -113,7 +116,8 @@ public class Command {
 
                 if (dataType == Float.class) {
                     data = Float.floatToIntBits(Float.parseFloat(dataStr));
-                } else {
+                }
+                else {
                     data = (int) Math.round(Float.parseFloat(dataStr));
                 }
             }
@@ -121,7 +125,8 @@ public class Command {
             // Send the command to the NMX
             if (hasData) {
                 NMXComs.cmd(addr, subAddr, thisCommand.command, thisCommand.dataLength, data);
-            } else {
+            }
+            else {
                 NMXComs.cmd(addr, subAddr, thisCommand.command);
             }
 
@@ -140,9 +145,11 @@ public class Command {
             T ret = null;
             if (returnType == Integer.class) {
                 ret = (T) returnType.cast(response);
-            } else if (returnType == Float.class) {
+            }
+            else if (returnType == Float.class) {
                 ret = (T) returnType.cast((float) response / Consts.FLOAT_CONVERSION);
-            } else if (returnType == Boolean.class) {
+            }
+            else if (returnType == Boolean.class) {
                 ret = (T) returnType.cast(response == 0 ? false : true);
             }
             // Void return type
@@ -517,11 +524,14 @@ public class Command {
         this.dataType = dataType;
         if (type == Command.Type.GENERAL) {
             this.subaddr = 0;
-        } else if (type == Command.Type.MOTOR) {
+        }
+        else if (type == Command.Type.MOTOR) {
             this.subaddr = 1;
-        } else if (type == Command.Type.CAMERA) {
+        }
+        else if (type == Command.Type.CAMERA) {
             this.subaddr = 4;
-        } else if (type == Command.Type.KEYFRAME) {
+        }
+        else if (type == Command.Type.KEYFRAME) {
             this.subaddr = 5;
         }
         this.dataType = dataType;
@@ -893,13 +903,17 @@ public class Command {
 
         if (type == Type.GENERAL) {
             return generalList;
-        } else if (type == Type.MOTOR) {
+        }
+        else if (type == Type.MOTOR) {
             return motorList;
-        } else if (type == Type.CAMERA) {
+        }
+        else if (type == Type.CAMERA) {
             return cameraList;
-        } else if (type == Type.KEYFRAME) {
+        }
+        else if (type == Type.KEYFRAME) {
             return keyFrameList;
-        } else {
+        }
+        else {
             System.out.println("That is not a supported command type");
             throw new UnsupportedOperationException();
         }
@@ -908,13 +922,17 @@ public class Command {
     public static Type getType(String name) {
         if (name.substring(0, 1).equals("g")) {
             return Type.GENERAL;
-        } else if (name.substring(0, 1).equals("m")) {
+        }
+        else if (name.substring(0, 1).equals("m")) {
             return Type.MOTOR;
-        } else if (name.substring(0, 1).equals("c")) {
+        }
+        else if (name.substring(0, 1).equals("c")) {
             return Type.CAMERA;
-        } else if (name.substring(0, 1).equals("k")) {
+        }
+        else if (name.substring(0, 1).equals("k")) {
             return Type.KEYFRAME;
-        } else {
+        }
+        else {
             return Type.NOT_A_TYPE;
         }
     }
@@ -1096,7 +1114,8 @@ public class Command {
             System.out.println("This is a motor command; the motor number must be specified to execute");
             this.printInfo();
             throw new UnsupportedOperationException();
-        } else {
+        }
+        else {
             return executeThis(this.subaddr, "0", false);
         }
     }
@@ -1111,7 +1130,8 @@ public class Command {
             }
             int tempSubaddr = motor + 1;
             return executeThis(tempSubaddr, "0", false);
-        } else {
+        }
+        else {
             return executeThis(this.subaddr, dataOrMotor, true);
         }
     }
@@ -1126,7 +1146,8 @@ public class Command {
             }
             int tempSubaddr = motorNum + 1;
             return executeThis(tempSubaddr, data, true);
-        } else {
+        }
+        else {
             System.out.println("This is a non-motor command; a motor number may not be specified");
             this.printInfo();
             throw new UnsupportedOperationException();
@@ -1149,7 +1170,8 @@ public class Command {
         if (hasData) {
             if (dataType == Float.class) {
                 data = Float.floatToIntBits(Float.parseFloat(dataStr));
-            } else {
+            }
+            else {
                 data = (int) Math.round(Float.parseFloat(dataStr));
             }
         }
@@ -1159,7 +1181,8 @@ public class Command {
         // Send the command to the NMX
         if (hasData) {
             commandPacket = NMXComs.cmd(addr, subAddr, this.command, this.dataLength, data);
-        } else {
+        }
+        else {
             commandPacket = NMXComs.cmd(addr, subAddr, this.command);
         }
 
@@ -1183,7 +1206,8 @@ public class Command {
         T ret = null;
         if (returnType == Integer.class) {
             ret = (T) returnType.cast(response);
-        } else if (returnType == Float.class) {
+        }
+        else if (returnType == Float.class) {
             float conversionVal;
             // There is a special conversion value for these two commands
             if (this.getName().equals(Motor.GET_GBOX_RATIO) || this.getName().equals(Motor.GET_PLAT_RATIO)
@@ -1192,7 +1216,8 @@ public class Command {
             else
                 conversionVal = FLOAT_CONVERSION;
             ret = (T) returnType.cast((float) response / conversionVal);
-        } else if (returnType == Boolean.class) {
+        }
+        else if (returnType == Boolean.class) {
             ret = (T) returnType.cast(response == 0 ? false : true);
         }
         // Void return type

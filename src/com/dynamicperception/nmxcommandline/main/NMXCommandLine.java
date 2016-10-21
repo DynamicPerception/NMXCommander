@@ -25,7 +25,7 @@ public class NMXCommandLine {
     private static Serial  serial;
     final static String    DELIMITER          = " ";
     // private static long lastTime;
-    private static String  version            = "0.4.1";
+    private static String  version            = "0.4.2";
     private static String  fullVersion        = version + "-beta";
     private static String  firmwareCommandSet = "0.60";
 
@@ -80,7 +80,7 @@ public class NMXCommandLine {
         Console.pln("\nIn order to enter the interactive command line tool, run this JAR file without arguments.\n"
                 + "Alternatively, you may run it with the following arguments to execute a single NMX command and then\n"
                 + "immediately disconnect from the controller and close this application:\n\n"
-                + "\"NMXCommander.jar [PORT NAME] [COMMAND TYPE].[COMMAND NAME] [DATA or MOTOR # (if required)] [MOTOR DATA (if required)]\"\n\n"
+                + "\"NMXCommander.jar [COM PORT NUMBER] [NMX ADDRESS] [COMMAND TYPE].[COMMAND NAME] [DATA or MOTOR # (if required)] [MOTOR DATA (if required)]\"\n\n"
                 + "If you're not familiar with the command types, names, data, etc., open the application in interactive\n"
                 + "mode first and read the extended help there.");
     }
@@ -106,7 +106,13 @@ public class NMXCommandLine {
                         + "Motor commands -- \"m.[COMMAND NAME] [MOTOR #] [DATA (if required)]\"\n\n"
                         + "Non-motor command types include \"g\" (general), \"c\" (camera), and \"k\" (key frame)\n"
                         + "When specifying the motor number for motor commands, counting starts at 0 (i.e. valid motor #s are 0, 1, 2)\n\n\n"
+                        + "Commands may also be executed from scripts by passing the commands as arguments with the following syntax:\n"
+                        + "\"NMXCommander-" + version
+                        + ".jar [COM PORT NUMBER] [NMX ADDRESS] [COMMAND TYPE].[COMMAND NAME] [MOTOR # (if required)] [DATA (if required)]\"\n\n"
+                        + "A full one-time execution should look something like this: "
+                        + "\"NMXCommander-" + version + ".jar 32 m.sendTo 0 15000\"\n\n\n"
                         + "******** NMX Commander Configuration Commands ********\n\n"
+                        + "NOTE: These commands do not take a prefix (e.g. g., m., etc)\n\n"
                         + "* \"outputAddress [ADDR # optional argument]\" -- without optional parameter, reports the current command address. With the\n"
                         + "optional parameter, sets the address to which the command will be sent. This is 3 by default and should not be changed unless\n"
                         + "you have manually reassigned the address of one or more of your controllers. !!!Sending commands to an incorrect address will\n"
@@ -176,16 +182,24 @@ public class NMXCommandLine {
             Console.pln("Invalid port! Either you picked the wrong number or you have the wrong syntax.\n"
                     + "Syntax is: "
                     + "\"NMXCommander-" + version
-                    + ".jar [COM PORT NUMBER] [COMMAND TYPE].[COMMAND NAME] [MOTOR # (if required)] [DATA (if required)]\"\n\n"
+                    + ".jar [COM PORT NUMBER] [NMX ADDRESS] [COMMAND TYPE].[COMMAND NAME] [MOTOR # (if required)] [DATA (if required)]\"\n\n"
                     + "A full one-time execution should look something like this: "
                     + "\"NMXCommander-" + version + ".jar 32 m.sendTo 0 15000\"");
             quit();
         }
 
         List<String> commandArgs = new ArrayList<String>();
-        for (int i = 1; i < args.length; i++) {
+        for (int i = 0; i < args.length; i++) {
             commandArgs.add(args[i]);
         }
+        outputAddress(commandArgs);
+
+        // Drop the COM port argument
+        commandArgs.remove(0);
+
+        // Drop the NMX address argument
+        commandArgs.remove(0);
+
         parseCommand(commandArgs);
         quit();
     }
