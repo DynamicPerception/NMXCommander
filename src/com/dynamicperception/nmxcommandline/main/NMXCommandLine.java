@@ -77,12 +77,7 @@ public class NMXCommandLine {
      * Prints help for starting application from the terminal
      */
     private static void printTerminalHelp() {
-        Console.pln("\nIn order to enter the interactive command line tool, run this JAR file without arguments.\n"
-                + "Alternatively, you may run it with the following arguments to execute a single NMX command and then\n"
-                + "immediately disconnect from the controller and close this application:\n\n"
-                + "\"NMXCommander.jar [COM PORT NUMBER] [NMX ADDRESS] [COMMAND TYPE].[COMMAND NAME] [DATA or MOTOR # (if required)] [MOTOR DATA (if required)]\"\n\n"
-                + "If you're not familiar with the command types, names, data, etc., open the application in interactive\n"
-                + "mode first and read the extended help there.");
+        Console.printFile("terminal_help.txt");
     }
 
     /**
@@ -92,7 +87,7 @@ public class NMXCommandLine {
         Console.pln("\n\n" + "******** Version ********\n\n" + "NMX Commander Version = " + fullVersion + "\n"
                 + "Firmware Command Set = " + firmwareCommandSet + "\n\n"
                 + "Firmware commands implemented after this firmware version are not supported. See goo.gl/S0wHPX for command set details.\n\n");
-        Console.printFile("help.txt");
+        Console.printFile("NMXCommander_help.txt");
 
     }
 
@@ -422,12 +417,7 @@ public class NMXCommandLine {
      */
     static void manualPacketCommand(List<String> args) {
         if (args.size() < 6 || args.size() > 7) {
-            Console.pln("Incorrect number of arguments");
-            Console.pln("Example -> \"packet [ADDR] [SUBADDR] [CMD] [LENGTH] [DATA (optional)] [RESPONSE]\"");
-            Console.pln("[ADDR], [SUBADDR], [CMD], and [LENGTH] are each a single byte with values\n"
-                    + "from 0-255. If [LENGTH] != 0, [DATA] may be a byte, int, long, or float,\n"
-                    + "depending on the command. If [LENGTH] == 0, do not include the [DATA]\n"
-                    + "parameter. [RESPONSE] is a boolean value.");
+            Console.printFile("manual_packet_err.txt");
         }
         else {
             List<Integer> intArgs = new ArrayList<>();
@@ -555,19 +545,7 @@ public class NMXCommandLine {
 
         try {
             if (args.size() == 1) {
-                Console.pln("\nrunMacro syntax -- \"runMacro [PATH]\"");
-                Console.pln("Example -> \"runMacro c:\\NMXmacro.txt\"\n");
-                Console.pln("The text file should have one command on each line with the following syntax:\n\n"
-                        + "\"[DELAY TIME] [COMMAND TYPE].[COMMAND NAME] [DATA or MOTOR # (if required)] [MOTOR DATA (if required)]\"\n\n"
-                        + "The following example enables the camera, sets the focus time to 600ms, trigger time to 100ms, sets home\n"
-                        + "for each of the motors (e.g. sets current position to 0), immediately takes an exposure, commands the motors to\n"
-                        + "a new position, waits 5000ms, takes another exposure, waits 1000ms, commands the motors back to their original\n"
-                        + "positions, waits 5000ms, then takes a final exposure:\n\n" + "0 c.setEnable 1\n"
-                        + "0 c.setFocus 600 \n" + "0 c.setTrigger 100 \n" + "0 m.setHome 0\n" + "0 m.setHome 1\n"
-                        + "0 m.setHome 2\n" + "0 c.expose\n" + "0 m.sendTo 0 15000\n" + "0 m.sendTo 1 2560\n"
-                        + "0 m.sendTo 2 -5000\n" + "5000 c.expose\n" + "1000 m.sendTo 0 0\n" + "0 m.sendTo 1 0\n"
-                        + "0 m.sendTo 2 0\n" + "5000 c.expose\n\n"
-                        + "Lines in the macro file may be commented out by starting a line with \"//\"");
+                Console.printFile("macro_help.txt");
             }
             else if (args.size() > 1) {
                 Path path = Paths.get(args.get(1));
@@ -679,7 +657,7 @@ public class NMXCommandLine {
     }
 
     /**
-     * Waits a given amount of time and prints a countdown of time remaining
+     * Waits a given amount of time and prints a count-down of time remaining
      * 
      * @param waitTime
      *            Time to wait in milliseconds

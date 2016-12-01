@@ -91,4 +91,4 @@ BE CAREFUL ABOUT THIS! If you accidentally send your rig two or four times as fa
 your valuable equipment!
 
 * If you try to send a motor to a position and it either does not move or does not go all the way to where you sent it,
-try running the command m.resetLimits [MOTOR #] to clear any end limits that may be restricting movement.);
+try running the command m.resetLimits [MOTOR #] to clear any end limits that may be restricting movement.

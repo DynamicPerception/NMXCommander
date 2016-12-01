@@ -1,0 +1,8 @@
+In order to enter the interactive command line tool, run this JAR file without arguments.
+Alternatively, you may run it with the following arguments to execute a single NMX command and then
+immediately disconnect from the controller and close this application:
+
+NMXCommander.jar [COM PORT NUMBER] [NMX ADDRESS] [COMMAND TYPE].[COMMAND NAME] [DATA or MOTOR # (if required)] [MOTOR DATA (if required)]
+
+If you're not familiar with the command types, names, data, etc., open the application in interactive
+mode first and read the extended help there.

@@ -1,0 +1,13 @@
+runMacro syntax -- "runMacro [PATH]"
+Example -> "runMacro c:\NMXmacro.txt"
+The text file should have one command on each line with the following syntax:
+[DELAY TIME] [COMMAND TYPE].[COMMAND NAME] [DATA or MOTOR # (if required)] [MOTOR DATA (if required)]
+The following example enables the camera, sets the focus time to 600ms, trigger time to 100ms, sets home
+for each of the motors (e.g. sets current position to 0), immediately takes an exposure, commands the motors to
+a new position, waits 5000ms, takes another exposure, waits 1000ms, commands the motors back to their original
+0 c.setEnable 1
+0 m.setHome 1
+0 m.sendTo 1 2560
+0 m.sendTo 1 0
+5000 c.expose
+Lines in the macro file may be commented out by starting a line with "//"

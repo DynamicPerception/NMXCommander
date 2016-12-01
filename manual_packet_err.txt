@@ -1,0 +1,8 @@
+Incorrect number of arguments!
+
+Example -> \"packet [ADDR] [SUBADDR] [CMD] [LENGTH] [DATA (optional)] [RESPONSE]"
+
+[ADDR], [SUBADDR], [CMD], and [LENGTH] are each a single byte with values
+from 0-255. If [LENGTH] != 0, [DATA] may be a byte, int, long, or float,
+depending on the command. If [LENGTH] == 0, do not include the [DATA]
+parameter. [RESPONSE] is a boolean value.
