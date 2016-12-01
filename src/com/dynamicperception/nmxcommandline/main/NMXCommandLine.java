@@ -64,8 +64,7 @@ public class NMXCommandLine {
             tempOut.close();
             tempFile.delete();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Console.pln("Failed to create temporary file. Sorry about the hiccup!");
         }
 
         // Enter program loop
@@ -360,8 +359,7 @@ public class NMXCommandLine {
             else
                 runCsvCommandFile();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Console.pln(INVALID_PATH);
         }
     }
 
@@ -541,7 +539,6 @@ public class NMXCommandLine {
      * 
      * @param path
      *            Path of the macro text file
-     * @throws IOException
      */
     private static void runMacro(List<String> args) {
 
@@ -571,8 +568,7 @@ public class NMXCommandLine {
                 }
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Console.pln(INVALID_PATH);
         }
 
     }
@@ -681,9 +677,9 @@ public class NMXCommandLine {
      * Closes the serial port and quits the application
      */
     private static void quit() {
-        if (Serial.isPortOpen())
+        if (Serial.isPortOpen()) {
             serial.closePort();
-        // Console.pln("Exiting application!");
+        }
         System.exit(0);
     }
 
