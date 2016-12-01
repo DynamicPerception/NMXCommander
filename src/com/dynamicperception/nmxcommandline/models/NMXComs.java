@@ -136,7 +136,7 @@ public class NMXComs {
     /**
      * An NMX command that does not include any additional data
      * 
-     * @param sub_addr
+     * @param subAddr
      *            The sub-address indicates which type of command is being sent.
      *            0 - General command, 1-3 - command to specific motor, 4 -
      *            camera command, 5 - key frame command;
@@ -154,7 +154,10 @@ public class NMXComs {
     /**
      * An NMX command that includes additional data
      * 
-     * @param sub_addr
+     * @param addr
+     *            The address of the controller. Default is 3.
+     * 
+     * @param subAddr
      *            The sub-address indicates which type of command is being sent.
      *            0 - General command, 1-3 - command to specific motor, 4 -
      *            camera command, 5 - key frame command;
@@ -184,7 +187,10 @@ public class NMXComs {
      * An NMX command that includes additional data. Optional no response
      * parameter
      * 
-     * @param sub_addr
+     * @param addr
+     *            The address of the controller. Default is 3.
+     * 
+     * @param subAddr
      *            The sub-address indicates which type of command is being sent.
      *            0 - General command, 1-3 - command to specific motor, 4 -
      *            camera command, 5 - key frame command;
@@ -198,7 +204,7 @@ public class NMXComs {
      *            If this parameter is false, the program will not wait for a
      *            response from the NMX
      */
-    public static String cmd(int addr, int _subAddr, int _command, int _length, int _data, boolean getResponse)
+    public static String cmd(int addr, int subAddr, int command, int length, int data, boolean getResponse)
             throws InterruptedException {
 
         responseOn = getResponse;
@@ -213,20 +219,20 @@ public class NMXComs {
                                                                    // leading
                                                                    // zero if
                                                                    // necessary
-        String sub_addr = _subAddr <= 15 ? "0" + Integer.toHexString(_subAddr) : Integer.toHexString(_subAddr);
-        String command = _command <= 15 ? "0" + Integer.toHexString(_command) : Integer.toHexString(_command);
-        String length = _length <= 15 ? "0" + Integer.toHexString(_length) : Integer.toHexString(_length);
-        String data = Integer.toHexString(_data).length() % 2 != 0 ? "0" + Integer.toHexString(_data)
-                : Integer.toHexString(_data);
-        commandPacket = header + address + sub_addr + command + length;
+        String subAddrStr = subAddr <= 15 ? "0" + Integer.toHexString(subAddr) : Integer.toHexString(subAddr);
+        String commandStr = command <= 15 ? "0" + Integer.toHexString(command) : Integer.toHexString(command);
+        String lengthStr = length <= 15 ? "0" + Integer.toHexString(length) : Integer.toHexString(length);
+        String dataStr = Integer.toHexString(data).length() % 2 != 0 ? "0" + Integer.toHexString(data)
+                : Integer.toHexString(data);
+        commandPacket = header + address + subAddrStr + commandStr + lengthStr;
 
         // If the length is non-zero, then append the data
-        if (_length != 0) {
+        if (length != 0) {
             // Make sure the data has any necessary leading zeros
-            if (data.length() / 2 != _length) {
-                int leading_zero_byes = _length - (data.length() / 2);
-                for (int i = 0; i < leading_zero_byes; i++) {
-                    data = "00" + data;
+            if (dataStr.length() / 2 != length) {
+                int leadingZeroByes = length - (dataStr.length() / 2);
+                for (int i = 0; i < leadingZeroByes; i++) {
+                    dataStr = "00" + dataStr;
                 }
             }
             // Append manual data (this is used for a few commands that require
@@ -300,15 +306,15 @@ public class NMXComs {
         emptyResponseCount = 0;
 
         // int length = Integer.decode("0x" + response.substring(18, 20));
-        int data_type = 7;
+        int dataType = 7;
         long data = ERROR;
         try {
-            data_type = Integer.decode("0x" + response.substring(20, 22));
+            dataType = Integer.decode("0x" + response.substring(20, 22));
             try {
                 data = Long.decode("0x" + response.substring(22, response.length()));
                 try {
                     // Handle negative longs
-                    if (data_type == 3 && Integer.decode("0x" + response.substring(22, 24)) == 255)
+                    if (dataType == 3 && Integer.decode("0x" + response.substring(22, 24)) == 255)
                         data = data - Long.decode("0xffffffff");
                 } catch (NumberFormatException e) {
                     System.out.println("Error handling negative data value");
@@ -418,11 +424,13 @@ public class NMXComs {
                                 if (headerLocation != 0) {
                                     index--;
                                     inBytes.remove(0);
-                                } else {
+                                }
+                                else {
                                     dataRemaining = inBytes.get(index);
                                     waitingForPreamble = false;
                                 }
-                            } else if (index > DATA_LENGTH_BYTE) {
+                            }
+                            else if (index > DATA_LENGTH_BYTE) {
                                 dataRemaining--;
                             }
                             index++;
