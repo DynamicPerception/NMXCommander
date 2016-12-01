@@ -41,7 +41,7 @@ public class NMXCommandLine {
         }
 
         // Get user to select port
-        // promptForPort();
+        promptForPort();
 
         // Print help
         printHelp();
